@@ -74,7 +74,7 @@ class guestsearch:
 		lgvariable.set(lessgreater[0])
 		apply(OptionMenu, (self.frame, lgvariable) + tuple(lessgreater)).grid(row = 2, column = 2)
 
-		cuisines = SQLfunc("SELECT Type FROM Cuisine")
+		cuisines = SQLfunc("SELECT cuisine FROM cuisines")
 		cuisineSelect = StringVar(self.frame)
 		cuisineSelect.set(cuisines[0])
 		apply(OptionMenu, (self.frame, cuisineSelect) + tuple(cuisines)).grid(row = 4, column = 1)
@@ -111,7 +111,7 @@ class guestcomplaint:
 		self.master = master
 		self.frame = ttk.Frame(self.master)
 		Label(self.frame, text = "Restraunt").grid(row = 0)
-		restraunts = SQLfunc('SELECT Name FROM Restaurant')
+		restraunts = SQLfunc('SELECT name FROM restaurant')
 
 		restrauntSelect = StringVar(self.frame)
 		restrauntSelect.set(restraunts[0])
@@ -145,10 +145,10 @@ class guestcomplaint:
 		self.master.destroy()
 
 	def submitComplaint(self,date,first,last,phone,description,restaurant):
-		if not SQLfunc("SELECT PhoneNo FROM Customer WHERE PhoneNo = " + phone):
-			SQLfunc("INSERT INTO Customer (PhoneNo, FirstName,LastName) VALUES (" + phone + ", '" + first + "', '" + last + "')")
-		RestID = SQLfunc("SELECT RestID FROM Restaurant WHERE Name = " + "'" + restaurant + "'")
-		SQLfunc("INSERT INTO Complaint (Date, RestID, PhoneNo, Description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", " + phone + ", '" + description + "')")
+		if not SQLfunc("SELECT phone FROM Customer WHERE phone = " + phone):
+			SQLfunc("INSERT INTO customer (phone, firstname, lastname) VALUES (" + phone + ", '" + first + "', '" + last + "')")
+		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
+		SQLfunc("INSERT INTO Complaint (cdate, rid, phone, description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", " + phone + ", '" + description + "')")
 
 if __name__ == "__main__":
 	root = ttk.Tk()
