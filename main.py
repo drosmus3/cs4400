@@ -67,7 +67,6 @@ restaurantSearch = RestaurantSearch()
 class loginScreen(ttk.Frame):
 	def __init__(self, master, controller):
 		ttk.Frame.__init__(self, master)
-		controller.resizeWindow("320x150+0+0")
 		Label(self, text = "Guest").grid(row = 0)
 
 		GuestLog = ttk.Button(self, text = "Login", command = lambda: controller.show_frame(guestwindow))
@@ -104,7 +103,6 @@ class loginScreen(ttk.Frame):
 class guestwindow(ttk.Frame):
 	def __init__(self, master, controller):
 		ttk.Frame.__init__(self, master)
-		controller.resizeWindow("320x150+0+0")
 
 		title = ttk.Label(self, text = "Guest GA Restaurant Health Inspections").grid(row = 0, columnspan = 2)
 		search = ttk.Button(self, text = "Search for Restaurant", command = lambda: controller.show_frame(guestsearch))
@@ -118,7 +116,6 @@ class guestwindow(ttk.Frame):
 class guestsearch(ttk.Frame):
 	def __init__(self, master, controller):
 		ttk.Frame.__init__(self, master)
-		controller.resizeWindow("320x150+0+0")
 
 		ttk.Label(self, text = "Restaurant Search").grid(row = 0, columnspan = 2)
 		ttk.Label(self, text = "Name").grid(row = 1)
@@ -165,8 +162,9 @@ class restaurantSearchRes:
 		self.frame = ttk.Frame(self.master)
 
 		searchResult = restaurantSearch.getResults()
+		print searchResult
 
-		if (searchResult != None):
+		if (len(searchResult)):
 			Label(self.frame, text = "Restaurant").grid(row = 0)
 			Label(self.frame, text = "Address").grid(row = 0, column = 1)
 			Label(self.frame, text = "Cuisine").grid(row = 0, column = 2)
@@ -182,12 +180,14 @@ class restaurantSearchRes:
 				Label(self.frame, text = str(searchResult[7 + i * 8])).grid(row = i + 1, column = 4)
 
 			#NEED TO ADD: Actually displaying the restaurants
+		else:
+			Label(self.frame, text = "No results found").grid(row = 0)
+
 		self.frame.pack()
 
 class guestcomplaint(ttk.Frame):
 	def __init__(self, master, controller):
 		ttk.Frame.__init__(self, master)
-		controller.resizeWindow("335x180+0+0")
 
 		Label(self, text = "Restaurant").grid(row = 0, column = 0)
 		restaurants = SQLfunc('SELECT name FROM restaurant')
