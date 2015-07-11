@@ -9,6 +9,7 @@ def SQLfunc(cmd):
 
 	cur = db.cursor()
 	cur.execute(cmd)
+	db.commit()
 	result = cur.fetchall()
 	list = []
 	for row in result:

@@ -145,12 +145,10 @@ class guestcomplaint:
 		self.master.destroy()
 
 	def submitComplaint(self,date,first,last,phone,description,restaurant):
-		if not SQLfunc("SELECT phone FROM customer WHERE phone = " + "'" + str(phone) + "'"):
-			print "INSERT INTO customer (phone, firstname, lastname) VALUES (" + "'" + str(phone) + "', '" + first + "', '" + last + "')"
-
-			SQLfunc("INSERT INTO customer (phone, firstname, lastname) VALUES (" + "'" + str(phone) + "', '" + first + "', '" + last + "')")
+		if not SQLfunc("SELECT phone FROM customer WHERE phone = " + "'" + phone + "';"):
+			SQLfunc("INSERT INTO customer (phone, firstname, lastname) VALUES (" + "'" + phone + "', '" + first + "', '" + last + "')")
 		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
-		SQLfunc("INSERT INTO complaint (cdate, rid, phone, description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", '" + str(phone) + "', '" + description + "')")
+		SQLfunc("INSERT INTO complaint (cdate, rid, phone, description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", '" + phone + "', '" + description + "')")
 
 if __name__ == "__main__":
 	root = ttk.Tk()
