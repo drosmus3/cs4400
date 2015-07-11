@@ -2,107 +2,37 @@ from Tkinter import *
 import Tkinter as ttk
 from sql import *
 
-class loginScreen:
-	def __init__(self, master):
-		self.master = master
-		self.frame = ttk.Frame(self.master)
-		Label(self.frame, text = "Guest").grid(row = 0)
+class App(ttk.Tk):
+	def __init__(self, *args):
+		ttk.Tk.__init__(self, *args)
 
-		GuestLog = ttk.Button(self.frame, text = "Login", command = self.openGuestWindow)
-		GuestLog.grid(row = 0, column = 1)
+		container = ttk.Frame(self)
 
-		ttk.Label(self.frame, text = "Restaurant Owner / Health Inspector Login").grid(row = 2, columnspan = 2, rowspan = 2)
+		container.pack(side = "top", fill = "both", expand = True)
+		container.grid_rowconfigure(0, weight = 1)
+		container.grid_columnconfigure(0, weight = 1)
 
-		ttk.Label(self.frame, text = "Username").grid(row = 4)
-		ttk.Label(self.frame, text = "Password").grid(row = 5)
+		self.frames = {}
+		for F in (loginScreen, guestwindow, guestsearch, guestcomplaint):
+			frame = F(container, self)
+			self.frames[F] = frame
+			frame.grid(row = 0, column = 0, sticky="nsew")
 
-		username = ttk.Entry(self.frame)
-		password = ttk.Entry(self.frame)
-		username.grid(row = 4, column = 1)
-		password.grid(row = 5, column = 1)
+		self.show_frame(loginScreen)
 
-		#MainLog = Button(root, text = "Login", command = self.openRohiWindow)
-		MainLog = Button(self.frame, text = "Login", command = lambda: self.openRohiWindow(username.get(),password.get()))
-		MainLog.grid(row = 6, column = 1)
-		self.frame.pack()
+	def show_frame(self, clazz):
+		# Show the class (frame) passed in
+		frame = self.frames[clazz]
+		frame.tkraise()
 
-	def openGuestWindow(self):
-		self.newWindow = ttk.Toplevel(self.master)
-		self.app = guestwindow(self.newWindow)
+	def resizeWindow(self, sizeStr):
+		self.geometry(sizeStr)
 
-	def openRohiWindow(self,username,password):
-		if not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "'"):
-			self.newWindow = ttk.Toplevel(self.master)
-			self.app = textwindow(self.newWindow, "User not found, idiot")
-		elif not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "' AND password = " + "'" + password + "'"):
-			self.newWindow = ttk.Toplevel(self.master)
-			self.app = textwindow(self.newWindow, "Incorrect password, idiot")
-		elif SQLfunc("SELECT * FROM operatorowner WHERE username = " + "'" + username + "'"):
-			email = SQLfunc("SELECT email FROM operatorowner WHERE username = " + "'" + username + "'")
-			email = email[0]
-			self.newWindow = ttk.Toplevel(self.master)
-			self.app = ownerwindow(self.newWindow,email)
+class RestaurantSearch:
+	def __init__(self):
+		self.results = None
 
-class guestwindow:
-	def __init__(self,master):
-		self.master = master
-		self.window = ttk.Frame(self.master)
-		search = ttk.Button(self.window, text = "Search for Restaurant", command = self.openguestsearch)
-		complaint = ttk.Button(self.window, text = "File a complaint", command = self.openguestcomplaint)
-		search.grid(row = 0)
-		complaint.grid(row = 0, column = 1)
-		self.window.pack()
-
-	def openguestsearch(self):
-		self.newWindow = ttk.Toplevel(self.master)
-		self.app = guestsearch(self.newWindow)
-
-	def openguestcomplaint(self):
-		self.newWindow = ttk.Toplevel(self.master)
-		self.app = guestcomplaint(self.newWindow)
-
-class guestsearch:
-	def __init__(self,master):
-		self.master = master
-		self.frame = ttk.Frame(self.master)
-		ttk.Label(self.frame, text = "Restaurant Search").grid(row = 0, columnspan = 2)
-		ttk.Label(self.frame, text = "Name").grid(row = 1)
-		ttk.Label(self.frame, text = "Score").grid(row = 2)
-		ttk.Label(self.frame, text = "Zipcode").grid(row = 3)
-		ttk.Label(self.frame, text = "Cuisine").grid(row = 4)
-
-		name = Entry(self.frame)
-		score = Entry(self.frame)
-		zipcode = Entry(self.frame)
-		name.grid(row = 1, column = 1)
-		score.grid(row = 2, column = 1)
-		zipcode.grid(row = 3, column = 1)
-
-		lessgreater = [
-			">",
-			"<"
-		]
-
-		lgvariable = StringVar(self.frame)
-		lgvariable.set(lessgreater[0])
-		apply(OptionMenu, (self.frame, lgvariable) + tuple(lessgreater)).grid(row = 2, column = 2)
-
-		cuisines = SQLfunc("SELECT cuisine FROM cuisines")
-		cuisineSelect = StringVar(self.frame)
-		cuisineSelect.set(cuisines[0])
-		apply(OptionMenu, (self.frame, cuisineSelect) + tuple(cuisines)).grid(row = 4, column = 1)
-
-		cancel = ttk.Button(self.frame, text = "Cancel", command = self.close)
-		cancel.grid(row = 5)
-
-		submit = ttk.Button(self.frame, text = "Submit", command = lambda: self.openrestaurantsearch(name.get(),score.get(),lgvariable.get(),zipcode.get(),cuisineSelect.get()))
-		submit.grid(row = 5, column = 1)
-		self.frame.pack()
-
-	def close(self):
-		self.master.destroy()
-
-	def openrestaurantsearch(self,name,score,lg,zip,cuisine):
+	def doSearch(self, name, score, lg, zip, cuisine):
 		#NEED TO ADD: The actual search query and pass it to restaurantsearch
 		searchString = "SELECT name, street, city, state, zipcode, cuisine, totalscore, idate FROM (restaurant JOIN inspection ON restaurant.rid=inspection.rid) WHERE ("
 		needand = False
@@ -124,74 +54,174 @@ class guestsearch:
 				searchString = searchString + " AND "
 			searchString = searchString + "cuisine = '" + cuisine + "'"
 		searchString = searchString + ')'
-		#print searchString
 		searchResult = SQLfunc(searchString)
-		#print searchResult
-		if searchResult:
+		self.setResults(searchResult)
+
+	def setResults(self, results):
+		self.results = results
+
+	def getResults(self):
+		return self.results
+restaurantSearch = RestaurantSearch()
+
+class loginScreen(ttk.Frame):
+	def __init__(self, master, controller):
+		ttk.Frame.__init__(self, master)
+		controller.resizeWindow("320x150+0+0")
+		Label(self, text = "Guest").grid(row = 0)
+
+		GuestLog = ttk.Button(self, text = "Login", command = lambda: controller.show_frame(guestwindow))
+		GuestLog.grid(row = 0, column = 1)
+
+		ttk.Label(self, text = "Restaurant Owner / Health Inspector Login").grid(row = 2, columnspan = 2, rowspan = 2)
+
+		ttk.Label(self, text = "Username").grid(row = 4)
+		ttk.Label(self, text = "Password").grid(row = 5)
+
+		username = ttk.Entry(self)
+		password = ttk.Entry(self)
+		username.grid(row = 4, column = 1)
+		password.grid(row = 5, column = 1)
+
+		#MainLog = Button(root, text = "Login", command = self.openRohiWindow)
+		MainLog = Button(self, text = "Login", command = lambda: self.openRohiWindow(username.get(),password.get()))
+		MainLog.grid(row = 6, column = 1)
+		self.pack()
+
+	def openRohiWindow(self,username,password):
+		if not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "'"):
 			self.newWindow = ttk.Toplevel(self.master)
-			self.app = restaurantsearch(self.newWindow, searchResult)
-		else:
+			self.app = textwindow(self.newWindow, "User not found, idiot")
+		elif not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "' AND password = " + "'" + password + "'"):
 			self.newWindow = ttk.Toplevel(self.master)
-			self.app = textwindow(self.newWindow, "No results")
+			self.app = textwindow(self.newWindow, "Incorrect password, idiot")
+		elif SQLfunc("SELECT * FROM operatorowner WHERE username = " + "'" + username + "'"):
+			email = SQLfunc("SELECT email FROM operatorowner WHERE username = " + "'" + username + "'")
+			email = email[0]
+			self.newWindow = ttk.Toplevel(self.master)
+			self.app = ownerwindow(self.newWindow,email)
 
-class restaurantsearch():
-	def __init__(self, master, searchResult):
+class guestwindow(ttk.Frame):
+	def __init__(self, master, controller):
+		ttk.Frame.__init__(self, master)
+		controller.resizeWindow("320x150+0+0")
 
-		self.master = master
-		self.frame = ttk.Frame(self.master)
-		Label(self.frame, text = "Restaurant").grid(row = 0)
-		Label(self.frame, text = "Address").grid(row = 0, column = 1)
-		Label(self.frame, text = "Cuisine").grid(row = 0, column = 2)
-		Label(self.frame, text = "Last Inspection Score").grid(row = 0, column = 3)
-		Label(self.frame, text = "Date of Last Inspection").grid(row = 0, column = 4)
+		title = ttk.Label(self, text = "Guest GA Restaurant Health Inspections").grid(row = 0, columnspan = 2)
+		search = ttk.Button(self, text = "Search for Restaurant", command = lambda: controller.show_frame(guestsearch))
+		complaint = ttk.Button(self, text = "File a complaint", command = lambda: controller.show_frame(guestcomplaint))
+		back = ttk.Button(self, text = "Back to Login Screen", command = lambda: controller.show_frame(loginScreen))
+		search.grid(row = 1, column = 0)
+		complaint.grid(row = 1, column = 1)
+		back.grid(row = 2, columnspan = 2)
+		self.pack()
 
-		for i in range (len(searchResult) / 8):
-			Label(self.frame, text = searchResult[0 + i * 8]).grid(row = i + 1)
-			Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult[3 + i * 8] + " " + str(searchResult[4 + i * 8])).grid(row = i + 1, column = 1)
-			#Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult [3 + i * 8]).grid(row = i + 1, column = 1)
-			Label(self.frame, text = searchResult[5 + i * 8]).grid(row = i + 1, column = 2)
-			Label(self.frame, text = str(searchResult[6 + i * 8])).grid(row = i + 1, column = 3)
-			Label(self.frame, text = str(searchResult[7 + i * 8])).grid(row = i + 1, column = 4)
-		#NEED TO ADD: Actually displaying the restaurants
-		self.frame.pack()
+class guestsearch(ttk.Frame):
+	def __init__(self, master, controller):
+		ttk.Frame.__init__(self, master)
+		controller.resizeWindow("320x150+0+0")
 
-class guestcomplaint:
-	def __init__(self,master):
-		self.master = master
-		self.frame = ttk.Frame(self.master)
-		Label(self.frame, text = "Restaurant").grid(row = 0)
-		restaurants = SQLfunc('SELECT name FROM restaurant')
+		ttk.Label(self, text = "Restaurant Search").grid(row = 0, columnspan = 2)
+		ttk.Label(self, text = "Name").grid(row = 1)
+		ttk.Label(self, text = "Score*").grid(row = 2)
+		ttk.Label(self, text = "Zipcode*").grid(row = 3)
+		ttk.Label(self, text = "Cuisine").grid(row = 4)
 
-		restaurantSelect = StringVar(self.frame)
-		restaurantSelect.set(restaurants[0])
-		apply(OptionMenu, (self.frame, restaurantSelect) + tuple(restaurants)).grid(row = 1)
+		name = Entry(self)
+		score = Entry(self)
+		zipcode = Entry(self)
+		name.grid(row = 1, column = 1)
+		score.grid(row = 2, column = 1)
+		zipcode.grid(row = 3, column = 1)
 
-		Label(self.frame, text = "Date of Meal (YYYY-MM-DD)").grid(row = 3)
-		Label(self.frame, text = "First Name").grid(row = 3, column = 1)
-		Label(self.frame, text = "Last Name").grid(row = 3, column = 2)
-		Label(self.frame, text = "Phone #").grid(row = 3, column = 3)
-		Label(self.frame, text = "Complaint Description").grid(row = 3, column = 4)
+		lessgreater = [
+			">",
+			"<"
+		]
 
-		date = Entry(self.frame)
-		first = Entry(self.frame)
-		last = Entry(self.frame)
-		phone = Entry(self.frame)
-		description = Entry(self.frame)
-		date.grid(row = 4)
-		first.grid(row = 4, column = 1)
-		last.grid(row = 4, column = 2)
-		phone.grid(row = 4, column = 3)
-		description.grid(row = 4, column = 4)
+		lgvariable = StringVar(self)
+		lgvariable.set(lessgreater[0])
+		apply(OptionMenu, (self, lgvariable) + tuple(lessgreater)).grid(row = 2, column = 2)
 
-		cancel = Button(self.frame, text = "Cancel", command = self.close)
+		cuisines = SQLfunc("SELECT cuisine FROM cuisines")
+		cuisineSelect = StringVar(self)
+		cuisineSelect.set(cuisines[0])
+		apply(OptionMenu, (self, cuisineSelect) + tuple(cuisines)).grid(row = 4, column = 1)
+
+		cancel = ttk.Button(self, text = "Go Back", command = lambda: controller.show_frame(guestwindow))
 		cancel.grid(row = 5)
 
-		submit = Button(self.frame, text = "Submit", command = lambda: self.submitComplaint(date.get(),first.get(),last.get(),phone.get(),description.get(),restaurantSelect.get()))
-		submit.grid(row = 5, column = 4)
+		submit = ttk.Button(self, text = "Submit", command = lambda: self.doSearchAndDisplay(controller, name.get(), score.get(), lgvariable.get(), zipcode.get(), cuisineSelect.get()))
+		submit.grid(row = 5, column = 1)
+		self.pack()
+
+	def doSearchAndDisplay(self, controller, name, score, lg, zip, cuisine):
+		restaurantSearch.doSearch(name, score, lg, zip, cuisine)
+		self.newWindow = ttk.Toplevel(self.master)
+		self.app = restaurantSearchRes(self.newWindow)
+
+class restaurantSearchRes:
+	def __init__(self, master):
+		self.master = master
+		self.frame = ttk.Frame(self.master)
+
+		searchResult = restaurantSearch.getResults()
+
+		if (searchResult != None):
+			Label(self.frame, text = "Restaurant").grid(row = 0)
+			Label(self.frame, text = "Address").grid(row = 0, column = 1)
+			Label(self.frame, text = "Cuisine").grid(row = 0, column = 2)
+			Label(self.frame, text = "Last Inspection Score").grid(row = 0, column = 3)
+			Label(self.frame, text = "Date of Last Inspection").grid(row = 0, column = 4)
+
+			for i in range (len(searchResult) / 8):
+				Label(self.frame, text = searchResult[0 + i * 8]).grid(row = i + 1)
+				Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult[3 + i * 8] + " " + str(searchResult[4 + i * 8])).grid(row = i + 1, column = 1)
+				#Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult [3 + i * 8]).grid(row = i + 1, column = 1)
+				Label(self.frame, text = searchResult[5 + i * 8]).grid(row = i + 1, column = 2)
+				Label(self.frame, text = str(searchResult[6 + i * 8])).grid(row = i + 1, column = 3)
+				Label(self.frame, text = str(searchResult[7 + i * 8])).grid(row = i + 1, column = 4)
+
+			#NEED TO ADD: Actually displaying the restaurants
 		self.frame.pack()
 
+class guestcomplaint(ttk.Frame):
+	def __init__(self, master, controller):
+		ttk.Frame.__init__(self, master)
+		controller.resizeWindow("335x180+0+0")
+
+		Label(self, text = "Restaurant").grid(row = 0, column = 0)
+		restaurants = SQLfunc('SELECT name FROM restaurant')
+
+		restaurantSelect = StringVar(self)
+		restaurantSelect.set(restaurants[0])
+		apply(OptionMenu, (self, restaurantSelect) + tuple(restaurants)).grid(row = 0, column = 1)
+
+		Label(self, text = "Date of Meal (YYYY-MM-DD)").grid(row = 2)
+		Label(self, text = "First Name").grid(row = 3, column = 0)
+		Label(self, text = "Last Name").grid(row = 4, column = 0)
+		Label(self, text = "Phone #").grid(row = 5, column = 0)
+		Label(self, text = "Complaint Description").grid(row = 6, column = 0)
+
+		date = Entry(self)
+		first = Entry(self)
+		last = Entry(self)
+		phone = Entry(self)
+		description = Entry(self)
+		date.grid(row = 2, column = 1)
+		first.grid(row = 3, column = 1)
+		last.grid(row = 4, column = 1)
+		phone.grid(row = 5, column = 1)
+		description.grid(row = 6, column = 1)
+
+		cancel = Button(self, text = "Cancel", command = lambda: controller.show_frame(guestwindow))
+		cancel.grid(row = 7, column = 0)
+
+		submit = Button(self, text = "Submit", command = lambda: self.submitComplaint(date.get(),first.get(),last.get(),phone.get(),description.get(),restaurantSelect.get()))
+		submit.grid(row = 7, column = 1)
+		self.pack()
+
 	def close(self):
-		self.master.destroy()
+		master.destroy()
 
 	def submitComplaint(self,date,first,last,phone,description,restaurant):
 		if not SQLfunc("SELECT phone FROM customer WHERE phone = " + "'" + phone + "';"):
@@ -298,7 +328,7 @@ class inspectionreportsrestaurant:
 		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitrestaurant(restaurantSelect.get(), email))
 		submit.grid(row = 6, column = 6)
 
-		self.window.pack()		
+		self.window.pack()
 
 	def close(self):
 		self.master.destroy()
@@ -365,7 +395,6 @@ class textwindow:
 		self.master.destroy()
 
 if __name__ == "__main__":
-	root = ttk.Tk()
-	app = loginScreen(root)
-	root.title("GEOWGIA RETRANT INSPERCTIN")
-	root.mainloop()
+	app = App()
+	app.title("GEOWGIA RETRANT INSPERCTIN")
+	app.mainloop()
