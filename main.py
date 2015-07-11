@@ -11,7 +11,7 @@ class loginScreen:
 		GuestLog = ttk.Button(self.frame, text = "Login", command = self.openGuestWindow)
 		GuestLog.grid(row = 0, column = 1)
 
-		ttk.Label(self.frame, text = "Restraunt Owner / Health Inspector Login").grid(row = 2, columnspan = 2, rowspan = 2)
+		ttk.Label(self.frame, text = "Restaurant Owner / Health Inspector Login").grid(row = 2, columnspan = 2, rowspan = 2)
 
 		ttk.Label(self.frame, text = "Username").grid(row = 4)
 		ttk.Label(self.frame, text = "Password").grid(row = 5)
@@ -34,7 +34,7 @@ class guestwindow:
 	def __init__(self,master):
 		self.master = master
 		self.window = ttk.Frame(self.master)
-		search = ttk.Button(self.window, text = "Search for Restraunt", command = self.openguestsearch)
+		search = ttk.Button(self.window, text = "Search for Restaurant", command = self.openguestsearch)
 		complaint = ttk.Button(self.window, text = "File a complaint", command = self.openguestcomplaint)
 		search.grid(row = 0)
 		complaint.grid(row = 0, column = 1)
@@ -52,7 +52,7 @@ class guestsearch:
 	def __init__(self,master):
 		self.master = master
 		self.frame = ttk.Frame(self.master)
-		ttk.Label(self.frame, text = "Restraunt Search").grid(row = 0, columnspan = 2)
+		ttk.Label(self.frame, text = "Restaurant Search").grid(row = 0, columnspan = 2)
 		ttk.Label(self.frame, text = "Name").grid(row = 1)
 		ttk.Label(self.frame, text = "Score").grid(row = 2)
 		ttk.Label(self.frame, text = "Zipcode").grid(row = 3)
@@ -98,7 +98,7 @@ class restaurantsearch:
 	def __init__(self, master):
 		self.master = master
 		self.frame = ttk.Frame(self.master)
-		Label(self.frame, text = "Restraunt").grid(row = 0)
+		Label(self.frame, text = "Restaurant").grid(row = 0)
 		Label(self.frame, text = "Address").grid(row = 0, column = 1)
 		Label(self.frame, text = "Cuisine").grid(row = 0, column = 2)
 		Label(self.frame, text = "Last Inspection Score").grid(row = 0, column = 3)
@@ -110,12 +110,12 @@ class guestcomplaint:
 	def __init__(self,master):
 		self.master = master
 		self.frame = ttk.Frame(self.master)
-		Label(self.frame, text = "Restraunt").grid(row = 0)
-		restraunts = SQLfunc('SELECT name FROM restaurant')
+		Label(self.frame, text = "Restaurant").grid(row = 0)
+		restaurants = SQLfunc('SELECT name FROM restaurant')
 
-		restrauntSelect = StringVar(self.frame)
-		restrauntSelect.set(restraunts[0])
-		apply(OptionMenu, (self.frame, restrauntSelect) + tuple(restraunts)).grid(row = 1)
+		restaurantSelect = StringVar(self.frame)
+		restaurantSelect.set(restaurants[0])
+		apply(OptionMenu, (self.frame, restaurantSelect) + tuple(restaurants)).grid(row = 1)
 
 		Label(self.frame, text = "Date of Meal (YYYY-MM-DD)").grid(row = 3)
 		Label(self.frame, text = "First Name").grid(row = 3, column = 1)
@@ -137,7 +137,7 @@ class guestcomplaint:
 		cancel = Button(self.frame, text = "Cancel", command = self.close)
 		cancel.grid(row = 5)
 
-		submit = Button(self.frame, text = "Submit", command = lambda: self.submitComplaint(date.get(),first.get(),last.get(),phone.get(),description.get(),restrauntSelect.get()))
+		submit = Button(self.frame, text = "Submit", command = lambda: self.submitComplaint(date.get(),first.get(),last.get(),phone.get(),description.get(),restaurantSelect.get()))
 		submit.grid(row = 5, column = 4)
 		self.frame.pack()
 
@@ -145,10 +145,12 @@ class guestcomplaint:
 		self.master.destroy()
 
 	def submitComplaint(self,date,first,last,phone,description,restaurant):
-		if not SQLfunc("SELECT phone FROM Customer WHERE phone = " + phone):
-			SQLfunc("INSERT INTO customer (phone, firstname, lastname) VALUES (" + phone + ", '" + first + "', '" + last + "')")
+		if not SQLfunc("SELECT phone FROM customer WHERE phone = " + "'" + str(phone) + "'"):
+			print "INSERT INTO customer (phone, firstname, lastname) VALUES (" + "'" + str(phone) + "', '" + first + "', '" + last + "')"
+
+			SQLfunc("INSERT INTO customer (phone, firstname, lastname) VALUES (" + "'" + str(phone) + "', '" + first + "', '" + last + "')")
 		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
-		SQLfunc("INSERT INTO Complaint (cdate, rid, phone, description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", " + phone + ", '" + description + "')")
+		SQLfunc("INSERT INTO complaint (cdate, rid, phone, description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", '" + str(phone) + "', '" + description + "')")
 
 if __name__ == "__main__":
 	root = ttk.Tk()

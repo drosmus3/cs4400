@@ -1,5 +1,5 @@
 import MySQLdb
- 
+
 def SQLfunc(cmd):
 
 	db = MySQLdb.connect(host="academic-mysql.cc.gatech.edu",
