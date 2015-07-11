@@ -91,11 +91,39 @@ class guestsearch:
 
 	def openrestaurantsearch(self,name,score,lg,zip,cuisine):
 		#NEED TO ADD: The actual search query and pass it to restaurantsearch
-		self.newWindow = ttk.Toplevel(self.master)
-		self.app = restaurantsearch(self.newWindow)
+		searchString = "SELECT name, street, city, state, zipcode, cuisine, totalscore, idate FROM (restaurant JOIN inspection ON restaurant.rid=inspection.rid) WHERE ("
+		needand = False
+		if name:
+			searchString = searchString + "name = '" + name + "'"
+			needand = True
+		if score:
+			if needand:
+				searchString = searchString + " AND "
+			searchString = searchString + "totalscore" + lg + score
+			needand = True
+		if zip:
+			if needand:
+				searchString = searchString + " AND "
+			searchString = searchString + "zipcode = " + zip
+			needand = True
+		if cuisine:
+			if needand:
+				searchString = searchString + " AND "
+			searchString = searchString + "cuisine = '" + cuisine + "'"
+		searchString = searchString + ')'
+		#print searchString
+		searchResult = SQLfunc(searchString)
+		#print searchResult
+		if searchResult:
+			self.newWindow = ttk.Toplevel(self.master)
+			self.app = restaurantsearch(self.newWindow, searchResult)
+		else:
+			self.newWindow = ttk.Toplevel(self.master)
+			self.app = textwindow(self.newWindow, "No results")
 
-class restaurantsearch:
-	def __init__(self, master):
+class restaurantsearch():
+	def __init__(self, master, searchResult):
+
 		self.master = master
 		self.frame = ttk.Frame(self.master)
 		Label(self.frame, text = "Restaurant").grid(row = 0)
@@ -103,6 +131,14 @@ class restaurantsearch:
 		Label(self.frame, text = "Cuisine").grid(row = 0, column = 2)
 		Label(self.frame, text = "Last Inspection Score").grid(row = 0, column = 3)
 		Label(self.frame, text = "Date of Last Inspection").grid(row = 0, column = 4)
+
+		for i in range (len(searchResult) / 8):
+			Label(self.frame, text = searchResult[0 + i * 8]).grid(row = i + 1)
+			Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult[3 + i * 8] + " " + str(searchResult[4 + i * 8])).grid(row = i + 1, column = 1)
+			#Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult [3 + i * 8]).grid(row = i + 1, column = 1)
+			Label(self.frame, text = searchResult[5 + i * 8]).grid(row = i + 1, column = 2)
+			Label(self.frame, text = str(searchResult[6 + i * 8])).grid(row = i + 1, column = 3)
+			Label(self.frame, text = str(searchResult[7 + i * 8])).grid(row = i + 1, column = 4)
 		#NEED TO ADD: Actually displaying the restaurants
 		self.frame.pack()
 
@@ -149,6 +185,18 @@ class guestcomplaint:
 			SQLfunc("INSERT INTO customer (phone, firstname, lastname) VALUES (" + "'" + phone + "', '" + first + "', '" + last + "')")
 		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
 		SQLfunc("INSERT INTO complaint (cdate, rid, phone, description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", '" + phone + "', '" + description + "')")
+
+class textwindow:
+	def __init__(self,master,txt):
+		self.master = master
+		self.frame = ttk.Frame(self.master)
+		Label(self.frame, text = txt).grid(row = 0)
+		OK = Button(self.frame, text = "OK", command = self.close)
+		OK.grid(row = 1)
+		self.frame.pack()
+
+	def close(self):
+		self.master.destroy()
 
 if __name__ == "__main__":
 	root = ttk.Tk()

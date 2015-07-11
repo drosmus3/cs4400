@@ -6,7 +6,7 @@ def SQLfunc(cmd):
 		user="cs4400_Group_17",
 		passwd="NBYelv9r",
 		db="cs4400_Group_17")
-
+	print cmd
 	cur = db.cursor()
 	cur.execute(cmd)
 	db.commit()
