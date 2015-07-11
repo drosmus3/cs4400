@@ -7,8 +7,15 @@ def SQLfunc(cmd):
 		user="cs4400_Group_17",
 		passwd="NBYelv9r",
 		db="cs4400_Group_17")
-#	print cmd
 	cur = db.cursor()
-
+	print cmd
 	cur.execute(cmd)
-	return cur.fetchall()
+	result = cur.fetchall()
+	list = []
+	for row in result:
+		for col in row:
+			#print col
+			list.append(col)
+
+	#print list
+	return list

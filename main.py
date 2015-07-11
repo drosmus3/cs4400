@@ -90,7 +90,6 @@ class guestsearch:
 		self.master.destroy()
 
 	def openrestaurantsearch(self,name,score,lg,zip,cuisine):
-		cuisine = cuisine.strip('(').strip(')').strip(',').strip("'")
 		#NEED TO ADD: The actual search query and pass it to restaurantsearch
 		self.newWindow = ttk.Toplevel(self.master)
 		self.app = restaurantsearch(self.newWindow)
@@ -118,7 +117,7 @@ class guestcomplaint:
 		restrauntSelect.set(restraunts[0])
 		apply(OptionMenu, (self.frame, restrauntSelect) + tuple(restraunts)).grid(row = 1)
 
-		Label(self.frame, text = "Date of Meal").grid(row = 3)
+		Label(self.frame, text = "Date of Meal (YYYY-MM-DD)").grid(row = 3)
 		Label(self.frame, text = "First Name").grid(row = 3, column = 1)
 		Label(self.frame, text = "Last Name").grid(row = 3, column = 2)
 		Label(self.frame, text = "Phone #").grid(row = 3, column = 3)
@@ -148,9 +147,8 @@ class guestcomplaint:
 	def submitComplaint(self,date,first,last,phone,description,restaurant):
 		if not SQLfunc("SELECT PhoneNo FROM Customer WHERE PhoneNo = " + phone):
 			SQLfunc("INSERT INTO Customer (PhoneNo, FirstName,LastName) VALUES (" + phone + ", '" + first + "', '" + last + "')")
-		RestID = SQLfunc("SELECT RestID FROM Restaurant WHERE Name = " + "'" + restaurant.strip('(').strip(')').strip(',').strip("'") + "'")
-		#NEED TO: Figure out why weird crap is getting returned and finish this
-		#SQLfunc("INSERT INTO Complaint (Date, RestID, PhoneNo, Description) VALUES (" + "'" + date + "', " + RestID[0] + ", " + phone + ", '" + description + "')")
+		RestID = SQLfunc("SELECT RestID FROM Restaurant WHERE Name = " + "'" + restaurant + "'")
+		SQLfunc("INSERT INTO Complaint (Date, RestID, PhoneNo, Description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", " + phone + ", '" + description + "')")
 
 if __name__ == "__main__":
 	root = ttk.Tk()
