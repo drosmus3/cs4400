@@ -34,7 +34,15 @@ class RestaurantSearch:
 
 	def doSearch(self, name, score, lg, zip, cuisine):
 		#NEED TO ADD: The actual search query and pass it to restaurantsearch
-		searchString = "SELECT name, street, city, state, zipcode, cuisine, totalscore, idate FROM (restaurant JOIN inspection ON restaurant.rid=inspection.rid) WHERE ("
+		searchString = ('SELECT name, street, city, state, zipcode, cuisine, totalscore, lastInspectdate '
+						'FROM restaurant '
+						'JOIN ('
+						'	SELECT rid, totalscore, max(idate) AS lastInspectDate '
+						'	FROM inspection '
+						'	GROUP BY rid'
+						') AS latestInspection '
+						'ON restaurant.rid = latestInspection.rid '
+						'WHERE (')
 		needand = False
 		if name:
 			searchString = searchString + "name = '" + name + "'"
@@ -53,7 +61,7 @@ class RestaurantSearch:
 			if needand:
 				searchString = searchString + " AND "
 			searchString = searchString + "cuisine = '" + cuisine + "'"
-		searchString = searchString + ')'
+		searchString = searchString + ') ORDER BY totalscore desc'
 		searchResult = SQLfunc(searchString)
 		self.setResults(searchResult)
 
