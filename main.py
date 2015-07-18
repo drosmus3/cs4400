@@ -442,7 +442,7 @@ class searchoptions:
 
 	def opensummarytop(self):
 		self.newWindow = ttk.Toplevel(self.master)
-		#self.app = restrauntinfo(self.newWindow,email)
+		self.app = summarytop(self.newWindow)
 
 	def opensummarycomplaints(self):
 		self.newWindow = ttk.Toplevel(self.master)
@@ -614,6 +614,59 @@ class summarycountyyearresult:
 
 		ttk.Label(self.window, text = "Grand Total").grid(row = 13, column = 0)
 		ttk.Label(self.window, text = str(count)).grid(row = 13, column = 1)
+
+		self.window.pack()
+
+class summarytop:
+	def __init__(self,master):
+		self.master = master
+		self.window = ttk.Frame(self.master)
+		ttk.Label(self.window, text = "Year").grid(row = 0, column = 0)
+		ttk.Label(self.window, text = "County").grid(row = 1, column = 0)
+		
+		year = ttk.Entry(self.window)
+		year.grid(row = 0, column = 1)
+
+		counties = SQLfunc("SELECT DISTINCT County FROM restaurant")
+		countySelect = StringVar(self.window)
+		countySelect.set(counties[0])
+		apply(OptionMenu, (self.window, countySelect) + tuple(counties)).grid(row = 1, column = 1)
+
+		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+		cancel.grid(row = 2, column = 0)
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(year.get(), countySelect.get()))
+		submit.grid(row = 2, column = 1)
+
+		self.window.pack()
+
+	def close(self):
+		self.master.destroy()
+
+	def submitinfo(self,year,county):
+		self.newWindow = ttk.Toplevel(self.master)
+
+		searchString = ("SELECT Cuisine,name,street,city,state,zipcode,MAX(totalscore) FROM restaurant AS R NATURAL JOIN "
+			"(SELECT * FROM inspection WHERE YEAR(idate) = "
+			+ str(year) + ") AS I WHERE County = "
+			+ "'" + county + "' GROUP BY Cuisine")
+		results = SQLfunc(searchString)
+		self.app = summarytopresult(self.newWindow,results)
+
+class summarytopresult:
+	def __init__(self,master,results):
+		self.master = master
+		self.window = ttk.Frame(self.master)
+
+		ttk.Label(self.window, text = "Cuisine").grid(row = 0, column = 0)
+		ttk.Label(self.window, text = "Restaurant Name").grid(row = 0, column = 1)
+		ttk.Label(self.window, text = "Address").grid(row = 0, column = 2)
+		ttk.Label(self.window, text = "Inspection Score").grid(row = 0, column = 3)
+
+		for i in range (len(results) / 7):
+			Label(self.window, text = results[0 + i * 7]).grid(row = i + 1, column = 0)
+			Label(self.window, text = results[1 + i * 7]).grid(row = i + 1, column = 1)
+			Label(self.window, text = results[2 + i * 7] + ", " + results[3 + i * 7] + ", " + results[4 + i * 7] + " " + str(results[5 + i * 7])).grid(row = i + 1, column = 2)
+			Label(self.window, text = results[6 + i * 7]).grid(row = i + 1, column = 3)
 
 		self.window.pack()
 
