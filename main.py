@@ -403,7 +403,7 @@ class inspectorwindow:
 	def __init__(self,master,inspid):
 		self.master = master
 		self.window = ttk.Frame(self.master)
-		search = ttk.Button(self.window, text = "Insert a Restaurant Inspection Report", command = self.openinspreport(inspid))
+		search = ttk.Button(self.window, text = "Insert a Restaurant Inspection Report", command = lambda: self.openinspreport(inspid))
 		complaint = ttk.Button(self.window, text = "Search Options", command = self.opensearchoptions)
 		search.grid(row = 0)
 		complaint.grid(row = 0, column = 1)
@@ -411,11 +411,90 @@ class inspectorwindow:
 
 	def openinspreport(self,inspid):
 		self.newWindow = ttk.Toplevel(self.master)
-		#self.app = restrauntinfo(self.newWindow,email)
+		self.app = inspreport(self.newWindow,inspid)
 
 	def opensearchoptions(self):
 		self.newWindow = ttk.Toplevel(self.master)
 		self.app = searchoptions(self.newWindow)
+
+class inspreport:
+	def __init__(self,master,inspid):
+		self.master = master
+		self.window = ttk.Frame(self.master)
+		
+		ttk.Label(self.window, text = "Restaurant ID").grid(row = 0, column = 0)
+		ttk.Label(self.window, text = "Inspection Date YYYY-MM-DD").grid(row = 1, column = 0)
+		
+		rid = ttk.Entry(self.window)
+		date = ttk.Entry(self.window)
+
+		rid.grid(row = 0, column = 1)
+		date.grid(row = 1, column = 1)		
+
+		items = SQLfunc("SELECT itemnum,description,critical FROM item")
+
+		ttk.Label(self.window, text = "Item Number").grid(row = 2, column = 0)
+		ttk.Label(self.window, text = "Item Desctiption").grid(row = 2, column = 1)
+		ttk.Label(self.window, text = "Critical").grid(row = 2, column = 2)
+		ttk.Label(self.window, text = "Score").grid(row = 2, column = 3)
+		ttk.Label(self.window, text = "Comments").grid(row = 2, column = 4)
+
+		for i in range(len(items) / 3):
+			ttk.Label(self.window, text = items[3 * i]).grid(row = i + 3, column = 0)
+			ttk.Label(self.window, text = items[3 * i + 1]).grid(row = i + 3, column = 1)
+			ttk.Label(self.window, text = items[3 * i + 2]).grid(row = i + 3, column = 2)
+
+		score = []
+		for i in range(len(items) / 3):
+			s = ttk.Entry(self.window)
+			s.grid(row = i + 3, column = 3)
+			score.append(s)
+
+		comment = []
+
+		for i in range(len(items) / 3):
+			c = ttk.Entry(self.window)
+			c.grid(row = i + 3, column = 4)
+			comment.append(c)
+
+		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+		cancel.grid(row = 18, column = 0)
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(rid.get(),date.get(),inspid,items,score,comment
+			))
+		submit.grid(row = 18, column = 4)
+
+		self.window.pack()
+
+	def close(self):
+		self.master.destroy()
+
+	def submitinfo(self,rid,date,inspid,items,score,comment):
+		totalscore = 0
+		failed = False
+
+		for i in range(len(score)):
+			totalscore = totalscore + int(score[i].get())
+			if items[3 * i + 2] == 'Y' and int(score[i].get()) < 8:
+				print items[i + 2]
+				print score[i].get()
+				failed = True
+
+		if totalscore < 75:
+			failed = True
+		if failed:
+			passfail = 'FAIL'
+		else:
+			passfail = 'PASS'
+
+		SQLfunc("INSERT INTO inspection (rid,iid,idate,totalscore,passfail) VALUES (" + str(rid) + "," + str(inspid) + ",'" + str(date) + "'," + str(totalscore) + ",'" + str(passfail) + "')")
+
+		for i in range(len(score)):
+			SQLfunc("INSERT INTO contains (itemnum,rid,idate,score) VALUES (" + str(i + 1) + "," + str(rid) + ",'" + str(date) + "'," + str(score[i].get()) + ")")
+			if comment[i].get():
+				SQLfunc("INSERT INTO includes (itemnum,rid,idate,comment) VALUES (" + str(i + 1) + "," + str(rid) + ",'" + str(date) + "', '" + str(comment[i].get()) + "')")
+
+		self.newWindow = ttk.Toplevel(self.master)
+		self.app = textwindow(self.newWindow,"Inspection Inserted")
 
 class searchoptions:
 	def __init__(self,master):
