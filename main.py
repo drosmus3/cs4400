@@ -446,7 +446,7 @@ class searchoptions:
 
 	def opensummarycomplaints(self):
 		self.newWindow = ttk.Toplevel(self.master)
-		#self.app = searchoptions(self.newWindow,inspid)
+		self.app = summarycomplaints(self.newWindow)
 
 class summarymonthyear:
 	def __init__(self,master):
@@ -667,6 +667,78 @@ class summarytopresult:
 			Label(self.window, text = results[1 + i * 7]).grid(row = i + 1, column = 1)
 			Label(self.window, text = results[2 + i * 7] + ", " + results[3 + i * 7] + ", " + results[4 + i * 7] + " " + str(results[5 + i * 7])).grid(row = i + 1, column = 2)
 			Label(self.window, text = results[6 + i * 7]).grid(row = i + 1, column = 3)
+
+		self.window.pack()
+
+class summarycomplaints:
+	def __init__(self,master):
+		self.master = master
+		self.window = ttk.Frame(self.master)
+		ttk.Label(self.window, text = "Year").grid(row = 0, column = 0)
+		ttk.Label(self.window, text = "Min Number of Complaints").grid(row = 1, column = 0)
+		ttk.Label(self.window, text = "Max Score").grid(row = 2, column = 0)
+
+		year = ttk.Entry(self.window)
+		complaints = ttk.Entry(self.window)
+		score = ttk.Entry(self.window)
+		year.grid(row = 0, column = 1)
+		complaints.grid(row = 1, column = 1)
+		score.grid(row = 2, column = 1)
+
+		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+		cancel.grid(row = 3, column = 0)
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(year.get(), complaints.get(), score.get()))
+		submit.grid(row = 3, column = 1)
+
+		self.window.pack()
+
+	def close(self):
+		self.master.destroy()
+
+	def submitinfo(self,year,complaints,score):
+		self.newWindow = ttk.Toplevel(self.master)
+
+		searchString = ("SELECT distinct rid FROM (SELECT * FROM (SELECT * FROM (select rid,COUNT(*) AS A "
+			"FROM complaint GROUP BY rid) AS complaintcount WHERE A >= "
+			+ str(complaints)
+			+") AS B NATURAL JOIN complaint) AS C "
+			+ "NATURAL JOIN (SELECT * FROM (SELECT rid, MAX(idate) AS idate, totalscore FROM inspection WHERE totalscore <= "
+			+ str(score)
+			+ " GROUP BY rid) AS D NATURAL JOIN (SELECT rid,idate FROM (item NATURAL JOIN contains) WHERE critical = 'Y' AND score < 9 "
+			+ "GROUP BY rid, idate) AS E) AS F")
+
+		results = SQLfunc(searchString)
+		self.app = summarycomplaintsresult(self.newWindow,results)
+
+class summarycomplaintsresult:
+	def __init__(self,master,results):
+		self.master = master
+		self.window = ttk.Frame(self.master)
+
+		rowcount = 0
+		for i in range(len(results)):
+			Label(self.window, text = "Restaurant Name").grid(row = rowcount, column = 0)
+			Label(self.window, text = "Address").grid(row = rowcount, column = 1)
+			Label(self.window, text = "Restaurant Operator").grid(row = rowcount, column = 2)
+			Label(self.window, text = "Operator Email").grid(row = rowcount, column = 3)
+			Label(self.window, text = "Score").grid(row = rowcount, column = 4)
+			Label(self.window, text = "Complaints").grid(row = rowcount, column = 5)
+			rowcount = rowcount + 1
+			restaurant = SQLfunc("SELECT DISTINCT name,street,city,state,zipcode,firstname,lastname,email,totalscore FROM (SELECT rid,name,street,city,state,zipcode,MAX(idate),email,totalscore FROM restaurant NATURAL JOIN inspection GROUP BY rid) AS A NATURAL JOIN (SELECT * FROM registereduser NATURAL JOIN operatorowner) AS B where rid = " + str(results[i]))
+
+			Label(self.window, text = restaurant[0]).grid(row = rowcount, column = 0)
+			Label(self.window, text = restaurant[1] + ", " + restaurant[2] + ", " + restaurant[3] + " " + str(restaurant[4])).grid(row = rowcount, column = 1)
+			Label(self.window, text = restaurant[5] + " " + restaurant[6]).grid(row = rowcount, column = 2)
+			Label(self.window, text = restaurant[7]).grid(row = rowcount, column = 3)
+			Label(self.window, text = restaurant[8]).grid(row = rowcount, column = 4)
+
+			complaints = SQLfunc("select description FROM complaint WHERE rid = " + str(results[i]))
+			Label(self.window, text = str(len(complaints))).grid(row = rowcount, column = 5)
+			Label(self.window, text = "Customer Complaints").grid(row = rowcount + 1, column = 0, columnspan = 5)
+			rowcount = rowcount + 2
+			for j in range(len(complaints)):
+				Label(self.window, text = complaints[j]).grid(row = rowcount, column = 0, columnspan = 5)
+				rowcount = rowcount + 1
 
 		self.window.pack()
 
