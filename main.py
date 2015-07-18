@@ -438,7 +438,7 @@ class searchoptions:
 
 	def opensummarycountyyear(self):
 		self.newWindow = ttk.Toplevel(self.master)
-		#self.app = searchoptions(self.newWindow,inspid)
+		self.app = summarycountyyear(self.newWindow)
 
 	def opensummarytop(self):
 		self.newWindow = ttk.Toplevel(self.master)
@@ -542,7 +542,78 @@ class summarymonthyearresult:
 		ttk.Label(self.window, text = str(inspectedcounttotal)).grid(row = offset + (len(counties) * len(cuisines)), column = 2)
 		ttk.Label(self.window, text = str(failedcounttotal)).grid(row = offset + (len(counties) * len(cuisines)), column = 3)
 
+		self.window.pack()
 
+class summarycountyyear:
+	def __init__(self,master):
+		self.master = master
+		self.window = ttk.Frame(self.master)
+		ttk.Label(self.window, text = "Year").grid(row = 0, column = 0)
+		ttk.Label(self.window, text = "County").grid(row = 1, column = 0)
+		
+		year = ttk.Entry(self.window)
+		year.grid(row = 0, column = 1)
+
+		counties = SQLfunc("SELECT DISTINCT County FROM restaurant")
+		countySelect = StringVar(self.window)
+		countySelect.set(counties[0])
+		apply(OptionMenu, (self.window, countySelect) + tuple(counties)).grid(row = 1, column = 1)
+
+		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+		cancel.grid(row = 2, column = 0)
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(year.get(), countySelect.get()))
+		submit.grid(row = 2, column = 1)
+
+		self.window.pack()
+
+	def close(self):
+		self.master.destroy()
+
+	def submitinfo(self,year,county):
+		self.newWindow = ttk.Toplevel(self.master)
+
+		searchString = ("SELECT MONTH(idate),COUNT(*) FROM (inspection NATURAL JOIN restaurant) WHERE YEAR(idate) = "
+		+ str(year) + " AND County = "
+		+ "'" + str(county) + "' GROUP BY MONTH(idate)")
+		results = SQLfunc(searchString)
+		self.app = summarycountyyearresult(self.newWindow,results)
+
+class summarycountyyearresult:
+	def __init__(self,master,results):
+		self.master = master
+		self.window = ttk.Frame(self.master)
+
+		months = ['January',
+		'February',
+		'March',
+		'April',
+		'May',
+		'June',
+		'July',
+		'August',
+		'September',
+		'October',
+		'November',
+		'December']
+
+		ttk.Label(self.window, text = "Month").grid(row = 0)
+		ttk.Label(self.window, text = "Restaurants Inspected").grid(row = 0, column = 1)
+
+		found = False
+		count = 0
+		for i in range(1,12):
+			ttk.Label(self.window, text = months[i-1]).grid(row = i, column = 0)
+			for k in range(len(results) / 2):
+				if(results[2 * k] == i):
+					ttk.Label(self.window, text = results[2 * k + 1]).grid(row = i, column = 1)
+					count = count + results[2 * k + 1]
+					found = True
+			if not found:
+				ttk.Label(self.window, text = "0").grid(row = i, column = 1)
+			found = False
+
+		ttk.Label(self.window, text = "Grand Total").grid(row = 13, column = 0)
+		ttk.Label(self.window, text = str(count)).grid(row = 13, column = 1)
 
 		self.window.pack()
 
