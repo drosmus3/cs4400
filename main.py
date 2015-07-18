@@ -62,7 +62,7 @@ class RestaurantSearch:
 
 	def getResults(self):
 		return self.results
-		restaurantSearch = RestaurantSearch()
+restaurantSearch = RestaurantSearch()
 
 class loginScreen(ttk.Frame):
 	def __init__(self, master, controller):
