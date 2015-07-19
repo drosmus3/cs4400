@@ -28,54 +28,9 @@ class App(ttk.Tk):
 	def resizeWindow(self, sizeStr):
 		self.geometry(sizeStr)
 
-class RestaurantSearch:
-	def __init__(self):
-		self.results = None
-
-	def doSearch(self, name, score, lg, zip, cuisine):
-		#NEED TO ADD: The actual search query and pass it to restaurantsearch
-		searchString = ('SELECT name, street, city, state, zipcode, cuisine, totalscore, lastInspectdate '
-			'FROM restaurant '
-			'JOIN ('
-			'	SELECT rid, totalscore, max(idate) AS lastInspectDate '
-			'	FROM inspection '
-			'	GROUP BY rid'
-			') AS latestInspection '
-			'ON restaurant.rid = latestInspection.rid '
-			'WHERE (')
-		needand = False
-		if name:
-			searchString = searchString + "name = '" + name + "'"
-			needand = True
-		if score:
-			if needand:
-				searchString = searchString + " AND "
-			searchString = searchString + "totalscore" + lg + score
-			needand = True
-		if zip:
-			if needand:
-				searchString = searchString + " AND "
-			searchString = searchString + "zipcode = " + zip
-			needand = True
-		if cuisine:
-			if needand:
-				searchString = searchString + " AND "
-			searchString = searchString + "cuisine = '" + cuisine + "'"
-		searchString = searchString + ') ORDER BY totalscore desc'
-		searchResult = SQLfunc(searchString)
-		self.setResults(searchResult)
-
-	def setResults(self, results):
-		self.results = results
-
-	def getResults(self):
-		return self.results
-restaurantSearch = RestaurantSearch()
-
 class loginScreen(ttk.Frame):
 	def __init__(self, master, controller):
 		ttk.Frame.__init__(self, master)
-#		controller.resizeWindow("320x150+0+0")
 		Label(self, text = "Guest").grid(row = 0)
 
 		GuestLog = ttk.Button(self, text = "Login", command = lambda: controller.show_frame(guestwindow))
@@ -94,7 +49,6 @@ class loginScreen(ttk.Frame):
 		#MainLog = Button(root, text = "Login", command = self.openRohiWindow)
 		MainLog = Button(self, text = "Login", command = lambda: self.openRohiWindow(controller,username.get(),password.get()))
 		MainLog.grid(row = 6, column = 1)
-#		self.pack()
 
 	def openRohiWindow(self,controller,username,password):
 		if not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "'"):
@@ -114,14 +68,11 @@ class loginScreen(ttk.Frame):
 			globinspid = SQLfunc("SELECT iid FROM inspector WHERE username = " + "'" + username + "'")
 			globinspid = globinspid[0]
 			print globinspid
-#			self.newWindow = ttk.Toplevel(self.master)
-#			self.app = inspectorwindow(self.newWindow,inspid)
 			controller.show_frame(inspectorwindow)
 
 class guestwindow(ttk.Frame):
 	def __init__(self, master, controller):
 		ttk.Frame.__init__(self, master)
-#		controller.resizeWindow("320x150+0+0")
 
 		title = ttk.Label(self, text = "Guest GA Restaurant Health Inspections").grid(row = 0, columnspan = 2)
 		search = ttk.Button(self, text = "Search for Restaurant", command = self.openguestsearch)
@@ -271,40 +222,10 @@ class guestsearch:
 		submit.grid(row = 7 + len(searchResult) / 8, column = 1)
 		self.frame.pack()
 
-
-class restaurantSearchRes:
-	def __init__(self, master):
-		self.master = master
-		self.frame = ttk.Frame(self.master)
-
-		searchResult = restaurantSearch.getResults()
-		print searchResult
-
-		if (len(searchResult)):
-			Label(self.frame, text = "Restaurant").grid(row = 0)
-			Label(self.frame, text = "Address").grid(row = 0, column = 1)
-			Label(self.frame, text = "Cuisine").grid(row = 0, column = 2)
-			Label(self.frame, text = "Last Inspection Score").grid(row = 0, column = 3)
-			Label(self.frame, text = "Date of Last Inspection").grid(row = 0, column = 4)
-
-			for i in range (len(searchResult) / 8):
-				Label(self.frame, text = searchResult[0 + i * 8]).grid(row = i + 1)
-				Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult[3 + i * 8] + " " + str(searchResult[4 + i * 8])).grid(row = i + 1, column = 1)
-				#Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult [3 + i * 8]).grid(row = i + 1, column = 1)
-				Label(self.frame, text = searchResult[5 + i * 8]).grid(row = i + 1, column = 2)
-				Label(self.frame, text = str(searchResult[6 + i * 8])).grid(row = i + 1, column = 3)
-				Label(self.frame, text = str(searchResult[7 + i * 8])).grid(row = i + 1, column = 4)
-
-			#NEED TO ADD: Actually displaying the restaurants
-		else:
-			Label(self.frame, text = "No results found").grid(row = 0)
-		self.frame.pack()
-
 class guestcomplaint:
 	def __init__(self, master):
 		self.master = master
 		self.frame = ttk.Frame(self.master)
-#		controller.resizeWindow("335x180+0+0")
 
 		Label(self.frame, text = "Restaurant").grid(row = 0, column = 0)
 		restaurants = SQLfunc('SELECT name FROM restaurant')
@@ -335,7 +256,6 @@ class guestcomplaint:
 
 		submit = Button(self.frame, text = "Submit", command = lambda: self.submitComplaint(date.get(),first.get(),last.get(),phone.get(),description.get(),restaurantSelect.get()))
 		submit.grid(row = 7, column = 1)
-#		self.pack()
 		self.frame.pack()
 	def close(self):
 		self.master.destroy()
@@ -449,9 +369,6 @@ class inspectionreportsrestaurant:
 		self.master.destroy()
 
 	def submitrestaurant(self,restaurant):
-#		self.newWindow = ttk.Toplevel(self.master)
-
-#		self.app = inspectionreportsresult(self.newWindow,RestID)
 
 		self.window.destroy()
 		self.window = ttk.Frame(self.master)
@@ -514,53 +431,9 @@ class inspectionreportsrestaurant:
 
 		self.window.pack()
 
-# class inspectionreportsresult:
-# 	def __init__(self,master,RestID):
-# 		self.master = master
-# 		self.window = ttk.Frame(self.master)
-
-# 		inspections = SQLfunc("SELECT idate, totalscore, passfail FROM inspection WHERE rid = " + RestID + " ORDER BY idate DESC LIMIT 2")
-
-# 		ttk.Label(self.window, text = str(inspections[3])).grid(row = 0, column = 2)
-# 		ttk.Label(self.window, text = str(inspections[0])).grid(row = 0, column = 3)
-
-# 		ttk.Label(self.window, text = "Item Number").grid(row = 1)
-# 		ttk.Label(self.window, text = "Item Description").grid(row = 1, column = 1)
-# 		ttk.Label(self.window, text = "Score").grid(row = 1, column = 2)
-# 		ttk.Label(self.window, text = "Score").grid(row = 1, column = 3)
-
-# 		items = SQLfunc("SELECT itemnum, description FROM item")
-# 		scores1 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[3]) + "'")
-# 		scores2 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[0]) + "'")
-
-# 		for i in range(len(items) / 2):
-# 			ttk.Label(self.window, text = str(items[i * 2])).grid(row = 2 + i, column = 0)
-# 			ttk.Label(self.window, text = str(items[i * 2 + 1])).grid(row = 2 + i, column = 1)
-# 		for i in range(len(scores1)):
-# 			ttk.Label(self.window, text = str(scores1[i])).grid(row = 2 + i, column = 2)
-# 		for i in range(len(scores2)):
-# 			ttk.Label(self.window, text = str(scores2[i])).grid(row = 2 + i, column = 3)
-
-# 		ttk.Label(self.window, text = "TOTAL SCORE").grid(row = 17)
-# 		ttk.Label(self.window, text = str(inspections[4])).grid(row = 17, column = 2)
-# 		ttk.Label(self.window, text = str(inspections[1])).grid(row = 17, column = 3)
-
-# 		ttk.Label(self.window, text = "PASS?").grid(row = 18)
-# 		ttk.Label(self.window, text = str(inspections[5])).grid(row = 18, column = 2)
-# 		ttk.Label(self.window, text = str(inspections[2])).grid(row = 18, column = 3)
-
-# 		close = ttk.Button(self.window, text = "Close", command = self.close)
-# 		close.grid(row = 19, column = 3)
-
-# 		self.window.pack()
-
-# 	def close(self):
-# 		self.master.destroy()
-
 class inspectorwindow(ttk.Frame):
 	def __init__(self, master, controller):
 		ttk.Frame.__init__(self, master)
-#		print inspid
 		search = ttk.Button(self, text = "Insert a Restaurant Inspection Report", command = self.openinspreport)
 		summarymonth = ttk.Button(self, text = "Summary Report (Search By Specified Month/Year)", command = self.opensummarymonthyear)
 		summarycounty = ttk.Button(self, text = "Summary Report (Search By Specified County/Year)", command = self.opensummarycountyyear)
@@ -574,8 +447,6 @@ class inspectorwindow(ttk.Frame):
 		summarytop.grid(row = 3)
 		summarycomplaints.grid(row = 4)
 		back.grid(row = 5)
-
-#		self.pack()
 
 	def openinspreport(self):
 		self.newWindow = ttk.Toplevel(self.master)
@@ -679,9 +550,6 @@ class inspreport:
 		self.newWindow = ttk.Toplevel(self.master)
 		self.app = textwindow(self.newWindow,"Inspection Inserted")
 
-
-
-
 class summarymonthyear:
 	def __init__(self,master):
 		self.master = master
@@ -776,7 +644,6 @@ class summarymonthyear:
 		submit.grid(row = 1 + offset + (len(counties)) * len(cuisines), column = 3)
 		self.window.pack()
 
-
 class summarycountyyear:
 	def __init__(self,master):
 		self.master = master
@@ -803,7 +670,6 @@ class summarycountyyear:
 		self.master.destroy()
 
 	def submitinfo(self,year,county):
-#		self.newWindow = ttk.Toplevel(self.master)
 
 		self.window.destroy()
 		self.window = ttk.Frame(self.master)
@@ -823,7 +689,6 @@ class summarycountyyear:
 		+ str(year) + " AND County = "
 		+ "'" + str(county) + "' GROUP BY MONTH(idate)")
 		results = SQLfunc(searchString)
-#		self.app = summarycountyyearresult(self.newWindow,results)
 
 		months = ['January',
 		'February',
@@ -929,7 +794,6 @@ class summarytop:
 
 		self.window.pack()
 
-
 class summarycomplaints:
 	def __init__(self,master):
 		self.master = master
@@ -1016,39 +880,6 @@ class summarycomplaints:
 		submit.grid(row = rowcount, column = 4)
 
 		self.window.pack()
-
-
-# class summarycomplaintsresult:
-# 	def __init__(self,master,results):
-# 		self.master = master
-# 		self.window = ttk.Frame(self.master)
-
-# 		rowcount = 0
-# 		for i in range(len(results)):
-# 			Label(self.window, text = "Restaurant Name").grid(row = rowcount, column = 0)
-# 			Label(self.window, text = "Address").grid(row = rowcount, column = 1)
-# 			Label(self.window, text = "Restaurant Operator").grid(row = rowcount, column = 2)
-# 			Label(self.window, text = "Operator Email").grid(row = rowcount, column = 3)
-# 			Label(self.window, text = "Score").grid(row = rowcount, column = 4)
-# 			Label(self.window, text = "Complaints").grid(row = rowcount, column = 5)
-# 			rowcount = rowcount + 1
-# 			restaurant = SQLfunc("SELECT DISTINCT name,street,city,state,zipcode,firstname,lastname,email,totalscore FROM (SELECT rid,name,street,city,state,zipcode,MAX(idate),email,totalscore FROM restaurant NATURAL JOIN inspection GROUP BY rid) AS A NATURAL JOIN (SELECT * FROM registereduser NATURAL JOIN operatorowner) AS B where rid = " + str(results[i]))
-
-# 			Label(self.window, text = restaurant[0]).grid(row = rowcount, column = 0)
-# 			Label(self.window, text = restaurant[1] + ", " + restaurant[2] + ", " + restaurant[3] + " " + str(restaurant[4])).grid(row = rowcount, column = 1)
-# 			Label(self.window, text = restaurant[5] + " " + restaurant[6]).grid(row = rowcount, column = 2)
-# 			Label(self.window, text = restaurant[7]).grid(row = rowcount, column = 3)
-# 			Label(self.window, text = restaurant[8]).grid(row = rowcount, column = 4)
-
-# 			complaints = SQLfunc("select description FROM complaint WHERE rid = " + str(results[i]))
-# 			Label(self.window, text = str(len(complaints))).grid(row = rowcount, column = 5)
-# 			Label(self.window, text = "Customer Complaints").grid(row = rowcount + 1, column = 0, columnspan = 5)
-# 			rowcount = rowcount + 2
-# 			for j in range(len(complaints)):
-# 				Label(self.window, text = complaints[j]).grid(row = rowcount, column = 0, columnspan = 5)
-# 				rowcount = rowcount + 1
-
-# 		self.window.pack()
 
 class textwindow:
 	def __init__(self,master,txt):
