@@ -13,7 +13,7 @@ class App(ttk.Tk):
 		container.grid_columnconfigure(0, weight = 1)
 
 		self.frames = {}
-		for F in (loginScreen, guestwindow, guestsearch, guestcomplaint, ownerwindow, inspectorwindow):
+		for F in (loginScreen, guestwindow, ownerwindow, inspectorwindow):
 			frame = F(container, self)
 			self.frames[F] = frame
 			frame.grid(row = 0, column = 0, sticky="nsew")
@@ -124,59 +124,152 @@ class guestwindow(ttk.Frame):
 #		controller.resizeWindow("320x150+0+0")
 
 		title = ttk.Label(self, text = "Guest GA Restaurant Health Inspections").grid(row = 0, columnspan = 2)
-		search = ttk.Button(self, text = "Search for Restaurant", command = lambda: controller.show_frame(guestsearch))
-		complaint = ttk.Button(self, text = "File a complaint", command = lambda: controller.show_frame(guestcomplaint))
+		search = ttk.Button(self, text = "Search for Restaurant", command = self.openguestsearch)
+		complaint = ttk.Button(self, text = "File a complaint", command = self.opencomplaint)
 		back = ttk.Button(self, text = "Back to Login Screen", command = lambda: controller.show_frame(loginScreen))
 		search.grid(row = 1, column = 0)
 		complaint.grid(row = 1, column = 1)
 		back.grid(row = 2, columnspan = 2)
-#		self.pack()
 
-class guestsearch(ttk.Frame):
-	def __init__(self, master, controller):
-		ttk.Frame.__init__(self, master)
-#		controller.resizeWindow("320x150+0+0")
+	def openguestsearch(self):
+		self.newWindow = ttk.Toplevel(self.master)
+		self.app = guestsearch(self.newWindow)
 
-		ttk.Label(self, text = "Restaurant Search").grid(row = 0, columnspan = 2)
-		ttk.Label(self, text = "Name").grid(row = 1)
-		ttk.Label(self, text = "Score*").grid(row = 2)
-		ttk.Label(self, text = "Zipcode*").grid(row = 3)
-		ttk.Label(self, text = "Cuisine").grid(row = 4)
+	def opencomplaint(self):
+		self.newWindow = ttk.Toplevel(self.master)
+		self.app = guestcomplaint(self.newWindow)
 
-		name = Entry(self)
-		score = Entry(self)
-		zipcode = Entry(self)
-		name.grid(row = 1, column = 1)
-		score.grid(row = 2, column = 1)
-		zipcode.grid(row = 3, column = 1)
+class guestsearch:
+	def __init__(self, master):
+		self.master = master
+		self.frame = ttk.Frame(self.master)
+
+		ttk.Label(self.frame, text = "Restaurant Search").grid(row = 0, columnspan = 2)
+		ttk.Label(self.frame, text = "Name").grid(row = 1)
+		ttk.Label(self.frame, text = "Score*").grid(row = 2)
+		ttk.Label(self.frame, text = "Zipcode*").grid(row = 3)
+		ttk.Label(self.frame, text = "Cuisine").grid(row = 4)
+
+		bname = Entry(self.frame)
+		bscore = Entry(self.frame)
+		bzipcode = Entry(self.frame)
+		bname.grid(row = 1, column = 1)
+		bscore.grid(row = 2, column = 1)
+		bzipcode.grid(row = 3, column = 1)
 
 		lessgreater = [
 			">",
 			"<"
 		]
 
-		lgvariable = StringVar(self)
+		lgvariable = StringVar(self.frame)
 		lgvariable.set(lessgreater[0])
-		apply(OptionMenu, (self, lgvariable) + tuple(lessgreater)).grid(row = 2, column = 2)
+		apply(OptionMenu, (self.frame, lgvariable) + tuple(lessgreater)).grid(row = 2, column = 2)
 
 		cuisines = SQLfunc("SELECT cuisine FROM cuisines")
-		cuisineSelect = StringVar(self)
+		cuisineSelect = StringVar(self.frame)
 		cuisineSelect.set(cuisines[0])
-		apply(OptionMenu, (self, cuisineSelect) + tuple(cuisines)).grid(row = 4, column = 1)
+		apply(OptionMenu, (self.frame, cuisineSelect) + tuple(cuisines)).grid(row = 4, column = 1)
 
-		cancel = ttk.Button(self, text = "Go Back", command = lambda: controller.show_frame(guestwindow))
+		cancel = ttk.Button(self.frame, text = "Go Back", command = self.close)
 		cancel.grid(row = 5)
 
-		submit = ttk.Button(self, text = "Submit", command = lambda: self.doSearchAndDisplay(controller, name.get(), score.get(), lgvariable.get(), zipcode.get(), cuisineSelect.get()))
+		submit = ttk.Button(self.frame, text = "Submit", command = lambda: self.submitinfo(bname.get(), bscore.get(), lgvariable.get(), bzipcode.get(), cuisineSelect.get()))
 		submit.grid(row = 5, column = 1)
-#		self.pack()
 
-	def doSearchAndDisplay(self, controller, name, score, lg, zip, cuisine):
+		self.frame.pack()
 
-		restaurantSearch.doSearch(name, score, lg, zip, cuisine)
-		self.newWindow = ttk.Toplevel(self.master)
-		self.app = restaurantSearchRes(self.newWindow)
-		
+	def close(self):
+		self.master.destroy()
+
+	def submitinfo(self,name,score,lg,zip,cuisine):
+
+		self.frame.destroy()
+		self.frame = ttk.Frame(self.master)
+
+		ttk.Label(self.frame, text = "Restaurant Search").grid(row = 0, columnspan = 2)
+		ttk.Label(self.frame, text = "Name").grid(row = 1)
+		ttk.Label(self.frame, text = "Score*").grid(row = 2)
+		ttk.Label(self.frame, text = "Zipcode*").grid(row = 3)
+		ttk.Label(self.frame, text = "Cuisine").grid(row = 4)
+
+		bname = Entry(self.frame)
+		bscore = Entry(self.frame)
+		bzipcode = Entry(self.frame)
+		bname.grid(row = 1, column = 1)
+		bscore.grid(row = 2, column = 1)
+		bzipcode.grid(row = 3, column = 1)
+
+		lessgreater = [
+			">",
+			"<"
+		]
+
+		lgvariable = StringVar(self.frame)
+		lgvariable.set(lessgreater[0])
+		apply(OptionMenu, (self.frame, lgvariable) + tuple(lessgreater)).grid(row = 2, column = 2)
+
+		cuisines = SQLfunc("SELECT cuisine FROM cuisines")
+		cuisineSelect = StringVar(self.frame)
+		cuisineSelect.set(cuisines[0])
+		apply(OptionMenu, (self.frame, cuisineSelect) + tuple(cuisines)).grid(row = 4, column = 1)
+
+
+		searchString = ('SELECT name, street, city, state, zipcode, cuisine, totalscore, lastInspectdate '
+			'FROM restaurant '
+			'JOIN ('
+			'	SELECT rid, totalscore, max(idate) AS lastInspectDate '
+			'	FROM inspection '
+			'	GROUP BY rid'
+			') AS latestInspection '
+			'ON restaurant.rid = latestInspection.rid '
+			'WHERE (')
+		needand = False
+		if name:
+			searchString = searchString + "name = '" + name + "'"
+			needand = True
+		if score:
+			if needand:
+				searchString = searchString + " AND "
+			searchString = searchString + "totalscore" + lg + score
+			needand = True
+		if zip:
+			if needand:
+				searchString = searchString + " AND "
+			searchString = searchString + "zipcode = " + zip
+			needand = True
+		if cuisine:
+			if needand:
+				searchString = searchString + " AND "
+			searchString = searchString + "cuisine = '" + cuisine + "'"
+		searchString = searchString + ') ORDER BY totalscore desc'
+		searchResult = SQLfunc(searchString)
+
+		if (len(searchResult)):
+			Label(self.frame, text = "Restaurant").grid(row = 5)
+			Label(self.frame, text = "Address").grid(row = 5, column = 1)
+			Label(self.frame, text = "Cuisine").grid(row = 5, column = 2)
+			Label(self.frame, text = "Last Inspection Score").grid(row = 5, column = 3)
+			Label(self.frame, text = "Date of Last Inspection").grid(row = 5, column = 4)
+
+			for i in range (len(searchResult) / 8):
+				Label(self.frame, text = searchResult[0 + i * 8]).grid(row = i + 6)
+				Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult[3 + i * 8] + " " + str(searchResult[4 + i * 8])).grid(row = i + 6, column = 1)
+				#Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult [3 + i * 8]).grid(row = i + 1, column = 1)
+				Label(self.frame, text = searchResult[5 + i * 8]).grid(row = i + 6, column = 2)
+				Label(self.frame, text = str(searchResult[6 + i * 8])).grid(row = i + 6, column = 3)
+				Label(self.frame, text = str(searchResult[7 + i * 8])).grid(row = i + 6, column = 4)
+
+			#NEED TO ADD: Actually displaying the restaurants
+		else:
+			Label(self.frame, text = "No results found").grid(row = 5, columnspan = 2)
+
+		cancel = ttk.Button(self.frame, text = "Close", command = self.close)
+		cancel.grid(row = 7 + len(searchResult) / 8)
+
+		submit = ttk.Button(self.frame, text = "Submit", command = lambda: self.submitinfo(bname.get(), bscore.get(), lgvariable.get(), bzipcode.get(), cuisineSelect.get()))
+		submit.grid(row = 7 + len(searchResult) / 8, column = 1)
+		self.frame.pack()
 
 
 class restaurantSearchRes:
@@ -207,44 +300,45 @@ class restaurantSearchRes:
 			Label(self.frame, text = "No results found").grid(row = 0)
 		self.frame.pack()
 
-class guestcomplaint(ttk.Frame):
-	def __init__(self, master, controller):
-		ttk.Frame.__init__(self, master)
+class guestcomplaint:
+	def __init__(self, master):
+		self.master = master
+		self.frame = ttk.Frame(self.master)
 #		controller.resizeWindow("335x180+0+0")
 
-		Label(self, text = "Restaurant").grid(row = 0, column = 0)
+		Label(self.frame, text = "Restaurant").grid(row = 0, column = 0)
 		restaurants = SQLfunc('SELECT name FROM restaurant')
 
-		restaurantSelect = StringVar(self)
+		restaurantSelect = StringVar(self.frame)
 		restaurantSelect.set(restaurants[0])
-		apply(OptionMenu, (self, restaurantSelect) + tuple(restaurants)).grid(row = 0, column = 1)
+		apply(OptionMenu, (self.frame, restaurantSelect) + tuple(restaurants)).grid(row = 0, column = 1)
 
-		Label(self, text = "Date of Meal (YYYY-MM-DD)").grid(row = 2)
-		Label(self, text = "First Name").grid(row = 3, column = 0)
-		Label(self, text = "Last Name").grid(row = 4, column = 0)
-		Label(self, text = "Phone #").grid(row = 5, column = 0)
-		Label(self, text = "Complaint Description").grid(row = 6, column = 0)
+		Label(self.frame, text = "Date of Meal (YYYY-MM-DD)").grid(row = 2)
+		Label(self.frame, text = "First Name").grid(row = 3, column = 0)
+		Label(self.frame, text = "Last Name").grid(row = 4, column = 0)
+		Label(self.frame, text = "Phone #").grid(row = 5, column = 0)
+		Label(self.frame, text = "Complaint Description").grid(row = 6, column = 0)
 
-		date = Entry(self)
-		first = Entry(self)
-		last = Entry(self)
-		phone = Entry(self)
-		description = Entry(self)
+		date = Entry(self.frame)
+		first = Entry(self.frame)
+		last = Entry(self.frame)
+		phone = Entry(self.frame)
+		description = Entry(self.frame)
 		date.grid(row = 2, column = 1)
 		first.grid(row = 3, column = 1)
 		last.grid(row = 4, column = 1)
 		phone.grid(row = 5, column = 1)
 		description.grid(row = 6, column = 1)
 
-		cancel = Button(self, text = "Cancel", command = lambda: controller.show_frame(guestwindow))
+		cancel = Button(self.frame, text = "Cancel", command = self.close)
 		cancel.grid(row = 7, column = 0)
 
-		submit = Button(self, text = "Submit", command = lambda: self.submitComplaint(date.get(),first.get(),last.get(),phone.get(),description.get(),restaurantSelect.get()))
+		submit = Button(self.frame, text = "Submit", command = lambda: self.submitComplaint(date.get(),first.get(),last.get(),phone.get(),description.get(),restaurantSelect.get()))
 		submit.grid(row = 7, column = 1)
 #		self.pack()
-
+		self.frame.pack()
 	def close(self):
-		master.destroy()
+		self.master.destroy()
 
 	def submitComplaint(self,date,first,last,phone,description,restaurant):
 		if not SQLfunc("SELECT phone FROM customer WHERE phone = " + "'" + phone + "';"):
