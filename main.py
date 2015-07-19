@@ -275,29 +275,22 @@ class restrauntinfo:
 		self.master = master
 		self.window = ttk.Frame(self.master)
 		ttk.Label(self.window, text = "Enter All Information").grid(row = 0, columnspan = 4)
-		ttk.Label(self.window, text = "Health Permit ID").grid(row = 1)
-		ttk.Label(self.window, text = "Health Permit Expiration (YYYY-MM-DD)").grid(row = 1, column = 1)
-		ttk.Label(self.window, text = "Cuisine").grid(row = 1, column = 4)
-
-		permitid = ttk.Entry(self.window)
-		permitexpdate = ttk.Entry(self.window)
-		permitid.grid(row = 2, column = 0)
-		permitexpdate.grid(row = 2, column = 1)
+		ttk.Label(self.window, text = "Restraunt Name").grid(row = 1)
+		ttk.Label(self.window, text = "Phone").grid(row = 2)
+		ttk.Label(self.window, text = "Health Permit ID").grid(row = 3)
+		ttk.Label(self.window, text = "Health Permit Expiration (YYYY-MM-DD)").grid(row = 4)
+		ttk.Label(self.window, text = "Cuisine").grid(row = 5)
 
 		cuisines = SQLfunc("SELECT cuisine FROM cuisines")
 		cuisineSelect = StringVar(self.window)
 		cuisineSelect.set(cuisines[0])
-		apply(OptionMenu, (self.window, cuisineSelect) + tuple(cuisines)).grid(row = 2, column = 4)
+		apply(OptionMenu, (self.window, cuisineSelect) + tuple(cuisines)).grid(row = 5, column = 1)
 
-		ttk.Label(self.window, text = " ").grid(row = 3)
-
-		ttk.Label(self.window, text = "Restraunt Name").grid(row = 4)
-		ttk.Label(self.window, text = "Street").grid(row = 4, column = 1)
-		ttk.Label(self.window, text = "City").grid(row = 4, column = 2)
-		ttk.Label(self.window, text = "State").grid(row = 4, column = 3)
-		ttk.Label(self.window, text = "Zipcode").grid(row = 4, column = 4)
-		ttk.Label(self.window, text = "County").grid(row = 4, column = 5)
-		ttk.Label(self.window, text = "Phone").grid(row = 4, column = 6)
+		ttk.Label(self.window, text = "Street").grid(row = 1, column = 2)
+		ttk.Label(self.window, text = "City").grid(row = 2, column = 2)
+		ttk.Label(self.window, text = "State").grid(row = 3, column = 2)
+		ttk.Label(self.window, text = "Zipcode").grid(row = 4, column = 2)
+		ttk.Label(self.window, text = "County").grid(row = 5, column = 2)
 
 		name = ttk.Entry(self.window)
 		street = ttk.Entry(self.window)
@@ -306,13 +299,18 @@ class restrauntinfo:
 		zipcode = ttk.Entry(self.window)
 		county = ttk.Entry(self.window)
 		phone = ttk.Entry(self.window)
-		name.grid(row = 5, column = 0)
-		street.grid(row = 5, column = 1)
-		city.grid(row = 5, column = 2)
-		state.grid(row = 5, column = 3)
-		zipcode.grid(row = 5, column = 4)
-		county.grid(row = 5, column = 5)
-		phone.grid(row = 5, column = 6)
+		permitid = ttk.Entry(self.window)
+		permitexpdate = ttk.Entry(self.window)
+
+		permitid.grid(row = 3, column = 1)
+		permitexpdate.grid(row = 4, column = 1)
+		name.grid(row = 1, column = 1)
+		street.grid(row = 1, column = 3)
+		city.grid(row = 2, column = 3)
+		state.grid(row = 3, column = 3)
+		zipcode.grid(row = 4, column = 3)
+		county.grid(row = 5, column = 3)
+		phone.grid(row = 2, column = 1)
 
 		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 		cancel.grid(row = 6)
@@ -332,7 +330,7 @@ class restrauntinfo:
 		SQLfunc("INSERT INTO restaurant (rid, phone, name, street, city, state, zipcode, county, cuisine, email) VALUES (" + str(newrid) + ", '" + str(phone) + "', '" + str(name) + "', '" + str(street) + "', '" + str(city) + "', '" + str(state) + "', " + str(zipcode) + ", '" + str(county) + "', '" + str(cuisine) + "', '" + str(globemail) + "')")
 		SQLfunc("INSERT INTO healthpermit (hpid, expirationdate, rid) VALUES (" + permitid + ", '" + permitexpdate + "', " + str(newrid) + ")")
 		self.newWindow = ttk.Toplevel(self.master)
-		self.app = textwindow(self.newWindow, "Info submitted. Idiot")
+		self.app = textwindow(self.newWindow, "Restaurant info submitted")
 
 class inspectionreportsrestaurant:
 	def __init__(self,master):
@@ -357,53 +355,113 @@ class inspectionreportsrestaurant:
 		self.master.destroy()
 
 	def submitrestaurant(self,restaurant):
-		self.newWindow = ttk.Toplevel(self.master)
-		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
-		RestID = str(RestID[0])
-		self.app = inspectionreportsresult(self.newWindow,RestID)
+#		self.newWindow = ttk.Toplevel(self.master)
 
-class inspectionreportsresult:
-	def __init__(self,master,RestID):
-		self.master = master
+#		self.app = inspectionreportsresult(self.newWindow,RestID)
+
+		self.window.destroy()
 		self.window = ttk.Frame(self.master)
 
+		ttk.Label(self.window, text = "Select your restaurant").grid(row = 0, columnspan = 2)
+
+		restaurants = SQLfunc("SELECT name FROM restaurant WHERE email = " + "'" + globemail + "'")
+
+		restaurantSelect = StringVar(self.window)
+		restaurantSelect.set(restaurants[0])
+		apply(OptionMenu, (self.window, restaurantSelect) + tuple(restaurants)).grid(row = 1)
+
+		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
+		RestID = str(RestID[0])
+		print RestID
 		inspections = SQLfunc("SELECT idate, totalscore, passfail FROM inspection WHERE rid = " + RestID + " ORDER BY idate DESC LIMIT 2")
 
-		ttk.Label(self.window, text = str(inspections[3])).grid(row = 0, column = 2)
-		ttk.Label(self.window, text = str(inspections[0])).grid(row = 0, column = 3)
 
-		ttk.Label(self.window, text = "Item Number").grid(row = 1)
-		ttk.Label(self.window, text = "Item Description").grid(row = 1, column = 1)
-		ttk.Label(self.window, text = "Score").grid(row = 1, column = 2)
-		ttk.Label(self.window, text = "Score").grid(row = 1, column = 3)
+
+
+
+		ttk.Label(self.window, text = str(inspections[0])).grid(row = 2, column = 3)
+
+		ttk.Label(self.window, text = "Item Number").grid(row = 3)
+		ttk.Label(self.window, text = "Item Description").grid(row = 3, column = 1)
+		ttk.Label(self.window, text = "Score").grid(row = 3, column = 3)
 
 		items = SQLfunc("SELECT itemnum, description FROM item")
-		scores1 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[3]) + "'")
+
+
 		scores2 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[0]) + "'")
 
 		for i in range(len(items) / 2):
-			ttk.Label(self.window, text = str(items[i * 2])).grid(row = 2 + i, column = 0)
-			ttk.Label(self.window, text = str(items[i * 2 + 1])).grid(row = 2 + i, column = 1)
-		for i in range(len(scores1)):
-			ttk.Label(self.window, text = str(scores1[i])).grid(row = 2 + i, column = 2)
+			ttk.Label(self.window, text = str(items[i * 2])).grid(row = 4 + i, column = 0)
+			ttk.Label(self.window, text = str(items[i * 2 + 1])).grid(row = 4 + i, column = 1)
+
 		for i in range(len(scores2)):
-			ttk.Label(self.window, text = str(scores2[i])).grid(row = 2 + i, column = 3)
+			ttk.Label(self.window, text = str(scores2[i])).grid(row = 4 + i, column = 3)
 
-		ttk.Label(self.window, text = "TOTAL SCORE").grid(row = 17)
-		ttk.Label(self.window, text = str(inspections[4])).grid(row = 17, column = 2)
-		ttk.Label(self.window, text = str(inspections[1])).grid(row = 17, column = 3)
+		ttk.Label(self.window, text = "TOTAL SCORE").grid(row = 5 + len(scores2))
+		ttk.Label(self.window, text = str(inspections[1])).grid(row = 5 + len(scores2), column = 3)
+		ttk.Label(self.window, text = "PASS?").grid(row = 6 + len(scores2))
+		ttk.Label(self.window, text = str(inspections[2])).grid(row = 6 + len(scores2), column = 3)
 
-		ttk.Label(self.window, text = "PASS?").grid(row = 18)
-		ttk.Label(self.window, text = str(inspections[5])).grid(row = 18, column = 2)
-		ttk.Label(self.window, text = str(inspections[2])).grid(row = 18, column = 3)
+		if len(inspections) > 3:
+			ttk.Label(self.window, text = "Score").grid(row = 3, column = 2)
+			ttk.Label(self.window, text = str(inspections[3])).grid(row = 2, column = 2)
+			scores1 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[3]) + "'")
+			ttk.Label(self.window, text = str(inspections[4])).grid(row = 5 + len(scores1), column = 2)
+			for i in range(len(scores1)):
+				ttk.Label(self.window, text = str(scores1[i])).grid(row = 4 + i, column = 2)
+			ttk.Label(self.window, text = str(inspections[5])).grid(row = 6 + len(scores1), column = 2)
 
-		close = ttk.Button(self.window, text = "Close", command = self.close)
-		close.grid(row = 19, column = 3)
+
+		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+		cancel.grid(row = 7 + len(scores2))
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitrestaurant(restaurantSelect.get()))
+		submit.grid(row = 7 + len(scores2), column = 6)
+
 
 		self.window.pack()
 
-	def close(self):
-		self.master.destroy()
+# class inspectionreportsresult:
+# 	def __init__(self,master,RestID):
+# 		self.master = master
+# 		self.window = ttk.Frame(self.master)
+
+# 		inspections = SQLfunc("SELECT idate, totalscore, passfail FROM inspection WHERE rid = " + RestID + " ORDER BY idate DESC LIMIT 2")
+
+# 		ttk.Label(self.window, text = str(inspections[3])).grid(row = 0, column = 2)
+# 		ttk.Label(self.window, text = str(inspections[0])).grid(row = 0, column = 3)
+
+# 		ttk.Label(self.window, text = "Item Number").grid(row = 1)
+# 		ttk.Label(self.window, text = "Item Description").grid(row = 1, column = 1)
+# 		ttk.Label(self.window, text = "Score").grid(row = 1, column = 2)
+# 		ttk.Label(self.window, text = "Score").grid(row = 1, column = 3)
+
+# 		items = SQLfunc("SELECT itemnum, description FROM item")
+# 		scores1 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[3]) + "'")
+# 		scores2 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[0]) + "'")
+
+# 		for i in range(len(items) / 2):
+# 			ttk.Label(self.window, text = str(items[i * 2])).grid(row = 2 + i, column = 0)
+# 			ttk.Label(self.window, text = str(items[i * 2 + 1])).grid(row = 2 + i, column = 1)
+# 		for i in range(len(scores1)):
+# 			ttk.Label(self.window, text = str(scores1[i])).grid(row = 2 + i, column = 2)
+# 		for i in range(len(scores2)):
+# 			ttk.Label(self.window, text = str(scores2[i])).grid(row = 2 + i, column = 3)
+
+# 		ttk.Label(self.window, text = "TOTAL SCORE").grid(row = 17)
+# 		ttk.Label(self.window, text = str(inspections[4])).grid(row = 17, column = 2)
+# 		ttk.Label(self.window, text = str(inspections[1])).grid(row = 17, column = 3)
+
+# 		ttk.Label(self.window, text = "PASS?").grid(row = 18)
+# 		ttk.Label(self.window, text = str(inspections[5])).grid(row = 18, column = 2)
+# 		ttk.Label(self.window, text = str(inspections[2])).grid(row = 18, column = 3)
+
+# 		close = ttk.Button(self.window, text = "Close", command = self.close)
+# 		close.grid(row = 19, column = 3)
+
+# 		self.window.pack()
+
+# 	def close(self):
+# 		self.master.destroy()
 
 class inspectorwindow(ttk.Frame):
 	def __init__(self, master, controller):
