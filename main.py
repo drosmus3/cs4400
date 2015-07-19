@@ -13,7 +13,7 @@ class App(ttk.Tk):
 		container.grid_columnconfigure(0, weight = 1)
 
 		self.frames = {}
-		for F in (loginScreen, guestwindow, guestsearch, guestcomplaint):
+		for F in (loginScreen, guestwindow, guestsearch, guestcomplaint, ownerwindow, inspectorwindow):
 			frame = F(container, self)
 			self.frames[F] = frame
 			frame.grid(row = 0, column = 0, sticky="nsew")
@@ -92,11 +92,11 @@ class loginScreen(ttk.Frame):
 		password.grid(row = 5, column = 1)
 
 		#MainLog = Button(root, text = "Login", command = self.openRohiWindow)
-		MainLog = Button(self, text = "Login", command = lambda: self.openRohiWindow(username.get(),password.get()))
+		MainLog = Button(self, text = "Login", command = lambda: self.openRohiWindow(controller,username.get(),password.get()))
 		MainLog.grid(row = 6, column = 1)
 #		self.pack()
 
-	def openRohiWindow(self,username,password):
+	def openRohiWindow(self,controller,username,password):
 		if not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "'"):
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow, "User not found")
@@ -104,16 +104,19 @@ class loginScreen(ttk.Frame):
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow, "Incorrect password")
 		elif SQLfunc("SELECT * FROM operatorowner WHERE username = " + "'" + username + "'"):
-			email = SQLfunc("SELECT email FROM operatorowner WHERE username = " + "'" + username + "'")
-			email = email[0]
-			self.newWindow = ttk.Toplevel(self.master)
-			self.app = ownerwindow(self.newWindow,email)
+			global globemail
+			globemail = SQLfunc("SELECT email FROM operatorowner WHERE username = " + "'" + username + "'")
+			globemail = globemail[0]
+			controller.show_frame(ownerwindow)
+
 		else:
-			inspid = SQLfunc("SELECT iid FROM inspector WHERE username = " + "'" + username + "'")
-			inspid = inspid[0]
-			self.newWindow = ttk.Toplevel(self.master)
-			self.app = inspectorwindow(self.newWindow,inspid)
-			controller.show_frame()
+			global globinspid
+			globinspid = SQLfunc("SELECT iid FROM inspector WHERE username = " + "'" + username + "'")
+			globinspid = globinspid[0]
+			print globinspid
+#			self.newWindow = ttk.Toplevel(self.master)
+#			self.app = inspectorwindow(self.newWindow,inspid)
+			controller.show_frame(inspectorwindow)
 
 class guestwindow(ttk.Frame):
 	def __init__(self, master, controller):
@@ -249,26 +252,26 @@ class guestcomplaint(ttk.Frame):
 		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
 		SQLfunc("INSERT INTO complaint (cdate, rid, phone, description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", '" + phone + "', '" + description + "')")
 
-class ownerwindow:
-	def __init__(self,master,email):
-		self.master = master
-		self.window = ttk.Frame(self.master)
-		search = ttk.Button(self.window, text = "Enter information about a restaurant", command = lambda: self.openrestrauntinfo(email))
-		complaint = ttk.Button(self.window, text = "View health inspection reports", command = lambda: self.openinspectionreport(email))
+class ownerwindow(ttk.Frame):
+	def __init__(self, master, controller):
+		ttk.Frame.__init__(self, master)
+		search = ttk.Button(self, text = "Enter information about a restaurant", command = self.openrestrauntinfo)
+		complaint = ttk.Button(self, text = "View health inspection reports", command = self.openinspectionreport)
+		back = ttk.Button(self, text = "Back to Login Screen", command = lambda: controller.show_frame(loginScreen))
 		search.grid(row = 0)
-		complaint.grid(row = 0, column = 1)
-		self.window.pack()
+		complaint.grid(row = 1)
+		back.grid(row = 2)
 
-	def openrestrauntinfo(self,email):
+	def openrestrauntinfo(self):
 		self.newWindow = ttk.Toplevel(self.master)
-		self.app = restrauntinfo(self.newWindow,email)
+		self.app = restrauntinfo(self.newWindow)
 
-	def openinspectionreport(self,email):
+	def openinspectionreport(self):
 		self.newWindow = ttk.Toplevel(self.master)
-		self.app = inspectionreportsrestaurant(self.newWindow,email)
+		self.app = inspectionreportsrestaurant(self.newWindow)
 
 class restrauntinfo:
-	def __init__(self,master,email):
+	def __init__(self,master):
 		self.master = master
 		self.window = ttk.Frame(self.master)
 		ttk.Label(self.window, text = "Enter All Information").grid(row = 0, columnspan = 4)
@@ -313,7 +316,7 @@ class restrauntinfo:
 
 		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 		cancel.grid(row = 6)
-		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(permitid.get(), permitexpdate.get(), name.get(), street.get(), city.get(), state.get(), zipcode.get(), county.get(), phone.get(), cuisineSelect.get(), email))
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(permitid.get(), permitexpdate.get(), name.get(), street.get(), city.get(), state.get(), zipcode.get(), county.get(), phone.get(), cuisineSelect.get()))
 		submit.grid(row = 6, column = 6)
 
 		self.window.pack()
@@ -321,23 +324,23 @@ class restrauntinfo:
 	def close(self):
 		self.master.destroy()
 
-	def submitinfo(self,permitid,permitexpdate,name,street,city,state,zipcode,county,phone,cuisine,email):
+	def submitinfo(self,permitid,permitexpdate,name,street,city,state,zipcode,county,phone,cuisine):
 		rid = SQLfunc("select MAX(rid) FROM restaurant")
 		newrid = rid[0] + 1
-#		print "INSERT INTO restaurant (rid, phone, name, street, city, state, zipcode, county, cuisine, email) VALUES (" + str(newrid) + ", '" + str(phone) + "', '" + str(name) + ", '" + str(street) + "', '" + str(city) + "', '" + str(state) + "', " + str(zipcode) + ", '" + str(county) + "', '" + str(cuisine) + "', '" + str(email) + "')"
+		print "INSERT INTO restaurant (rid, phone, name, street, city, state, zipcode, county, cuisine, email) VALUES (" + str(newrid) + ", '" + str(phone) + "', '" + str(name) + ", '" + str(street) + "', '" + str(city) + "', '" + str(state) + "', " + str(zipcode) + ", '" + str(county) + "', '" + str(cuisine) + "', '" + str(globemail) + "')"
 
-		SQLfunc("INSERT INTO restaurant (rid, phone, name, street, city, state, zipcode, county, cuisine, email) VALUES (" + str(newrid) + ", '" + str(phone) + "', '" + str(name) + "', '" + str(street) + "', '" + str(city) + "', '" + str(state) + "', " + str(zipcode) + ", '" + str(county) + "', '" + str(cuisine) + "', '" + str(email) + "')")
+		SQLfunc("INSERT INTO restaurant (rid, phone, name, street, city, state, zipcode, county, cuisine, email) VALUES (" + str(newrid) + ", '" + str(phone) + "', '" + str(name) + "', '" + str(street) + "', '" + str(city) + "', '" + str(state) + "', " + str(zipcode) + ", '" + str(county) + "', '" + str(cuisine) + "', '" + str(globemail) + "')")
 		SQLfunc("INSERT INTO healthpermit (hpid, expirationdate, rid) VALUES (" + permitid + ", '" + permitexpdate + "', " + str(newrid) + ")")
 		self.newWindow = ttk.Toplevel(self.master)
 		self.app = textwindow(self.newWindow, "Info submitted. Idiot")
 
 class inspectionreportsrestaurant:
-	def __init__(self,master,email):
+	def __init__(self,master):
 		self.master = master
 		self.window = ttk.Frame(self.master)
 		ttk.Label(self.window, text = "Select your restaurant").grid(row = 0, columnspan = 2)
 
-		restaurants = SQLfunc("SELECT name FROM restaurant WHERE email = " + "'" + email + "'")
+		restaurants = SQLfunc("SELECT name FROM restaurant WHERE email = " + "'" + globemail + "'")
 
 		restaurantSelect = StringVar(self.window)
 		restaurantSelect.set(restaurants[0])
@@ -345,7 +348,7 @@ class inspectionreportsrestaurant:
 
 		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 		cancel.grid(row = 6)
-		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitrestaurant(restaurantSelect.get(), email))
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitrestaurant(restaurantSelect.get()))
 		submit.grid(row = 6, column = 6)
 
 		self.window.pack()
@@ -353,14 +356,14 @@ class inspectionreportsrestaurant:
 	def close(self):
 		self.master.destroy()
 
-	def submitrestaurant(self,restaurant,email):
+	def submitrestaurant(self,restaurant):
 		self.newWindow = ttk.Toplevel(self.master)
 		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
 		RestID = str(RestID[0])
-		self.app = inspectionreportsresult(self.newWindow,RestID,email)
+		self.app = inspectionreportsresult(self.newWindow,RestID)
 
 class inspectionreportsresult:
-	def __init__(self,master,RestID,email):
+	def __init__(self,master,RestID):
 		self.master = master
 		self.window = ttk.Frame(self.master)
 
@@ -402,29 +405,29 @@ class inspectionreportsresult:
 	def close(self):
 		self.master.destroy()
 
-class inspectorwindow:
-	def __init__(self,master,inspid):
-		self.master = master
-		self.window = ttk.Frame(self.master)
-		search = ttk.Button(self.window, text = "Insert a Restaurant Inspection Report", command = lambda: self.openinspreport(inspid))
-		summarymonth = ttk.Button(self.window, text = "Summary Report (Search By Specified Month/Year)", command = self.opensummarymonthyear)
-		summarycounty = ttk.Button(self.window, text = "Summary Report (Search By Specified County/Year)", command = self.opensummarycountyyear)
-		summarytop = ttk.Button(self.window, text = "Top Health Inspection Ratings", command = self.opensummarytop)
-		summarycomplaints = ttk.Button(self.window, text = "Customer Complaints", command = self.opensummarycomplaints)
-		close = ttk.Button(self.window, text = "Back to Login Screen", command = self.close)
+class inspectorwindow(ttk.Frame):
+	def __init__(self, master, controller):
+		ttk.Frame.__init__(self, master)
+#		print inspid
+		search = ttk.Button(self, text = "Insert a Restaurant Inspection Report", command = self.openinspreport)
+		summarymonth = ttk.Button(self, text = "Summary Report (Search By Specified Month/Year)", command = self.opensummarymonthyear)
+		summarycounty = ttk.Button(self, text = "Summary Report (Search By Specified County/Year)", command = self.opensummarycountyyear)
+		summarytop = ttk.Button(self, text = "Top Health Inspection Ratings", command = self.opensummarytop)
+		summarycomplaints = ttk.Button(self, text = "Customer Complaints", command = self.opensummarycomplaints)
+		back = ttk.Button(self, text = "Back to Login Screen", command = lambda: controller.show_frame(loginScreen))
 
 		search.grid(row = 0)
 		summarymonth.grid(row = 1)
 		summarycounty.grid(row = 2)
 		summarytop.grid(row = 3)
 		summarycomplaints.grid(row = 4)
-		close.grid(row = 5)
+		back.grid(row = 5)
 
-		self.window.pack()
+#		self.pack()
 
-	def openinspreport(self,inspid):
+	def openinspreport(self):
 		self.newWindow = ttk.Toplevel(self.master)
-		self.app = inspreport(self.newWindow,inspid)
+		self.app = inspreport(self.newWindow)
 
 	def opensummarymonthyear(self):
 		self.newWindow = ttk.Toplevel(self.master)
@@ -446,10 +449,10 @@ class inspectorwindow:
 		self.master.destroy()
 
 class inspreport:
-	def __init__(self,master,inspid):
+	def __init__(self,master):
 		self.master = master
 		self.window = ttk.Frame(self.master)
-		
+		print globinspid
 		ttk.Label(self.window, text = "Restaurant ID").grid(row = 0, column = 0)
 		ttk.Label(self.window, text = "Inspection Date YYYY-MM-DD").grid(row = 1, column = 0)
 		
@@ -487,7 +490,7 @@ class inspreport:
 
 		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 		cancel.grid(row = 18, column = 0)
-		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(rid.get(),date.get(),inspid,items,score,comment
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(rid.get(),date.get(),items,score,comment
 			))
 		submit.grid(row = 18, column = 4)
 
@@ -496,7 +499,7 @@ class inspreport:
 	def close(self):
 		self.master.destroy()
 
-	def submitinfo(self,rid,date,inspid,items,score,comment):
+	def submitinfo(self,rid,date,items,score,comment):
 		totalscore = 0
 		failed = False
 
@@ -514,7 +517,7 @@ class inspreport:
 		else:
 			passfail = 'PASS'
 
-		SQLfunc("INSERT INTO inspection (rid,iid,idate,totalscore,passfail) VALUES (" + str(rid) + "," + str(inspid) + ",'" + str(date) + "'," + str(totalscore) + ",'" + str(passfail) + "')")
+		SQLfunc("INSERT INTO inspection (rid,iid,idate,totalscore,passfail) VALUES (" + str(rid) + "," + str(globinspid) + ",'" + str(date) + "'," + str(totalscore) + ",'" + str(passfail) + "')")
 
 		for i in range(len(score)):
 			SQLfunc("INSERT INTO contains (itemnum,rid,idate,score) VALUES (" + str(i + 1) + "," + str(rid) + ",'" + str(date) + "'," + str(score[i].get()) + ")")
