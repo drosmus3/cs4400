@@ -994,14 +994,14 @@ class summarycomplaints:
 														"SELECT rid, MAX(idate) AS idate, totalscore "
 														"FROM inspection "
 														"WHERE totalscore <= " + str(score)	+
-														#" AND year(idate) = " + str(year) + ?
+														" AND year(idate) = " + str(year) +
 														" GROUP BY rid"
 													") AS D "
 												"NATURAL JOIN ("
 																"SELECT rid, idate "
 																"FROM (item NATURAL JOIN contains) "
-																"WHERE critical = 'Y' AND score < 9 "
-																"GROUP BY rid, idate"
+																"WHERE critical = 'Y' AND score < 9 AND year(idate) = " + str(year) +
+																" GROUP BY rid, idate"
 															") AS E "
 												"GROUP BY rid"
 											") AS F")
@@ -1025,7 +1025,7 @@ class summarycomplaints:
 				Label(self.window, text = restaurant[7]).grid(row = rowcount, column = 3)
 				Label(self.window, text = restaurant[8]).grid(row = rowcount, column = 4)
 
-				complaints = SQLfunc("select description FROM complaint WHERE rid = " + str(results[i]))
+				complaints = SQLfunc("select description FROM complaint WHERE rid = " + str(results[i]) + " AND year(cdate) = " + str(year))
 				Label(self.window, text = str(len(complaints))).grid(row = rowcount, column = 5)
 				Label(self.window, text = "Customer Complaints").grid(row = rowcount + 1, column = 0, columnspan = 5, sticky = "W")
 				rowcount = rowcount + 2
