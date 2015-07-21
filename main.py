@@ -273,7 +273,7 @@ class guestcomplaint:
 		self.master.destroy()
 
 	def submitComplaint(self,date,first,last,phone,description,restaurant):
-		r = re.compile('.{4}-.{2}-.{2}')
+		r = re.compile('\d{4}-\d{2}-\d{2}')
 		correctDate = None
 		if r.match(date) and (date[0] + date[1] + date[2] + date[3] + date[5] + date[6] + date [8] + date[9]).isdigit():
 			try:
@@ -380,7 +380,7 @@ class restrauntinfo:
 		self.master.destroy()
 
 	def submitinfo(self,permitid,permitexpdate,name,street,city,state,zipcode,county,phone,cuisine):
-		r = re.compile('d{4}-d{2}-d{2}')
+		r = re.compile('\d{4}-\d{2}-\d{2}')
 		correctDate = None
 		if r.match(permitexpdate):
 			try:
@@ -392,7 +392,7 @@ class restrauntinfo:
 		if not name or len(name) > 30:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow, "Please enter a valid name")
-		elif not phone or int(phone) < 1000000000 or int(phone) > 9999999999:
+		elif not phone or not phone.isdigit() or int(phone) < 1000000000 or int(phone) > 9999999999:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid phone number")
 		elif not permitid:
@@ -600,8 +600,7 @@ class inspreport:
 		self.master.destroy()
 
 	def submitinfo(self,rid,date,items,score,comment):
-		r = re.compile('.{4}-.{2}-.{2}')
-		r = re.compile('.{4}-.{2}-.{2}')
+		r = re.compile('\d{4}-\d{2}-\d{2}')
 		correctDate = None
 		if r.match(date) and (date[0] + date[1] + date[2] + date[3] + date[5] + date[6] + date [8] + date[9]).isdigit():
 			try:
@@ -646,9 +645,8 @@ class inspreport:
 			for i in range(len(score)):
 				totalscore = totalscore + int(score[i].get())
 				if items[3 * i + 2] == 'Y' and int(score[i].get()) < 8:
-					print items[i + 2]
-					print score[i].get()
 					failed = True
+				print totalscore
 
 			if totalscore < 75:
 				failed = True
@@ -862,7 +860,7 @@ class summarytop:
 		self.window = ttk.Frame(self.master)
 		ttk.Label(self.window, text = "Year").grid(row = 0, column = 0)
 		ttk.Label(self.window, text = "County").grid(row = 1, column = 0)
-		
+
 		byear = ttk.Entry(self.window)
 		byear.grid(row = 0, column = 1)
 
@@ -906,21 +904,30 @@ class summarytop:
 				+ "'" + county + "' GROUP BY Cuisine")
 			results = SQLfunc(searchString)
 
-			ttk.Label(self.window, text = "Cuisine").grid(row = 2, column = 0)
-			ttk.Label(self.window, text = "Restaurant Name").grid(row = 2, column = 1)
-			ttk.Label(self.window, text = "Address").grid(row = 2, column = 2)
-			ttk.Label(self.window, text = "Inspection Score").grid(row = 2, column = 3)
+			if len(results) is 0:
+				ttk.Label(self.window, text = "No results found!").grid(row = 2, column = 0, columnspan = 2)
 
-			for i in range (len(results) / 7):
-				Label(self.window, text = results[0 + i * 7]).grid(row = i + 3, column = 0)
-				Label(self.window, text = results[1 + i * 7]).grid(row = i + 3, column = 1)
-				Label(self.window, text = results[2 + i * 7] + ", " + results[3 + i * 7] + ", " + results[4 + i * 7] + " " + str(results[5 + i * 7])).grid(row = i + 3, column = 2)
-				Label(self.window, text = results[6 + i * 7]).grid(row = i + 3, column = 3)
+				cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+				cancel.grid(row = 3, column = 0)
+				submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(byear.get(), countySelect.get()))
+				submit.grid(row = 3, column = 1)
 
-			cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
-			cancel.grid(row = 4 + (len(results) / 7), column = 0)
-			submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(byear.get(), countySelect.get()))
-			submit.grid(row = 4 + (len(results) / 7), column = 3)
+			else:
+				ttk.Label(self.window, text = "Cuisine").grid(row = 2, column = 0)
+				ttk.Label(self.window, text = "Restaurant Name").grid(row = 2, column = 1)
+				ttk.Label(self.window, text = "Address").grid(row = 2, column = 2)
+				ttk.Label(self.window, text = "Inspection Score").grid(row = 2, column = 3)
+
+				for i in range (len(results) / 7):
+					Label(self.window, text = results[0 + i * 7]).grid(row = i + 3, column = 0)
+					Label(self.window, text = results[1 + i * 7]).grid(row = i + 3, column = 1)
+					Label(self.window, text = results[2 + i * 7] + ", " + results[3 + i * 7] + ", " + results[4 + i * 7] + " " + str(results[5 + i * 7])).grid(row = i + 3, column = 2)
+					Label(self.window, text = results[6 + i * 7]).grid(row = i + 3, column = 3)
+
+				cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+				cancel.grid(row = 4 + (len(results) / 7), column = 0)
+				submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(byear.get(), countySelect.get()))
+				submit.grid(row = 4 + (len(results) / 7), column = 3)
 
 			self.window.pack()
 
