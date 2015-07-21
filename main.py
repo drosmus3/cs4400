@@ -1030,30 +1030,35 @@ class summarycomplaints:
 
 			results = SQLfunc(searchString)
 
+			if (len(results)):
+				self.resultsGrid = ttk.Frame(self.window, background="black")
+				self.resultsGrid.grid(sticky="nsew")
+
 			rowcount = 3
 			for i in range(len(results)):
-				Label(self.window, text = "Restaurant Name").grid(row = rowcount, column = 0)
-				Label(self.window, text = "Address").grid(row = rowcount, column = 1)
-				Label(self.window, text = "Restaurant Operator").grid(row = rowcount, column = 2)
-				Label(self.window, text = "Operator Email").grid(row = rowcount, column = 3)
-				Label(self.window, text = "Score").grid(row = rowcount, column = 4)
-				Label(self.window, text = "Complaints").grid(row = rowcount, column = 5)
+				Label(self.resultsGrid, text = "Restaurant Name", bg="powderblue").grid(row = rowcount, column = 0, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = "Address", bg="powderblue").grid(row = rowcount, column = 1, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = "Restaurant Operator", bg="powderblue").grid(row = rowcount, column = 2, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = "Operator Email", bg="powderblue").grid(row = rowcount, column = 3, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = "Score", bg="powderblue").grid(row = rowcount, column = 4, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = "Complaints", bg="powderblue").grid(row = rowcount, column = 5, padx=1, pady=1, sticky="nsew")
 				rowcount = rowcount + 1
 				restaurant = SQLfunc("SELECT DISTINCT name,street,city,state,zipcode,firstname,lastname,email,totalscore FROM (SELECT rid,name,street,city,state,zipcode,MAX(idate),email,totalscore FROM restaurant NATURAL JOIN inspection GROUP BY rid) AS A NATURAL JOIN (SELECT * FROM registereduser NATURAL JOIN operatorowner) AS B where rid = " + str(results[i]))
 
-				Label(self.window, text = restaurant[0]).grid(row = rowcount, column = 0)
-				Label(self.window, text = restaurant[1] + ", " + restaurant[2] + ", " + restaurant[3] + " " + str(restaurant[4])).grid(row = rowcount, column = 1)
-				Label(self.window, text = restaurant[5] + " " + restaurant[6]).grid(row = rowcount, column = 2)
-				Label(self.window, text = restaurant[7]).grid(row = rowcount, column = 3)
-				Label(self.window, text = restaurant[8]).grid(row = rowcount, column = 4)
+				Label(self.resultsGrid, text = restaurant[0]).grid(row = rowcount, column = 0, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = restaurant[1] + ", " + restaurant[2] + ", " + restaurant[3] + " " + str(restaurant[4])).grid(row = rowcount, column = 1, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = restaurant[5] + " " + restaurant[6]).grid(row = rowcount, column = 2, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = restaurant[7]).grid(row = rowcount, column = 3, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = restaurant[8]).grid(row = rowcount, column = 4, padx=1, pady=1, sticky="nsew")
 
 				complaints = SQLfunc("select description FROM complaint WHERE rid = " + str(results[i]) + " AND year(cdate) = " + str(year))
-				Label(self.window, text = str(len(complaints))).grid(row = rowcount, column = 5)
-				Label(self.window, text = "Customer Complaints").grid(row = rowcount + 1, column = 0, columnspan = 5, sticky = "W")
+				Label(self.resultsGrid, text = str(len(complaints))).grid(row = rowcount, column = 5, padx=1, pady=1, sticky="nsew")
+				Label(self.resultsGrid, text = "Customer Complaints:", bg="peachpuff").grid(row = rowcount + 1, column = 0, columnspan = 6, sticky = "nsew", padx=1, pady=1)
 				rowcount = rowcount + 2
 				for j in range(len(complaints)):
-					Label(self.window, text = complaints[j]).grid(row = rowcount, column = 0, columnspan = 5, sticky = "W")
+					Label(self.resultsGrid, text = complaints[j]).grid(row = rowcount, column = 0, columnspan = 6, sticky = "nsew", padx=1, pady=1)
 					rowcount = rowcount + 1
+				#Label(self.resultsGrid, text = "", bg="gray33").grid(row = rowcount + 2, column = 0, columnspan = 6, sticky = "nsew", padx=1, pady=1)
 
 			if len(results) is 0:
 				Label(self.window, text = "No results!").grid(row=rowcount, column=0, columnspan=2)
