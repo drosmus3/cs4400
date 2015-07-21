@@ -435,7 +435,7 @@ class inspectionreportsrestaurant:
 	def __init__(self,master):
 		self.master = master
 		self.window = ttk.Frame(self.master)
-		ttk.Label(self.window, text = "Select your restaurant").grid(row = 0, columnspan = 2)
+		ttk.Label(self.window, text = "Select your restaurant").grid(row = 0, column=0, sticky="W")
 
 		restaurants = SQLfunc("SELECT name FROM restaurant WHERE email = " + "'" + globemail + "'")
 
@@ -443,10 +443,10 @@ class inspectionreportsrestaurant:
 		restaurantSelect.set(restaurants[0])
 		apply(OptionMenu, (self.window, restaurantSelect) + tuple(restaurants)).grid(row = 1)
 
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitrestaurant(restaurantSelect.get()))
+		submit.grid(row = 1, column = 1, sticky="W")
 		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 		cancel.grid(row = 6)
-		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitrestaurant(restaurantSelect.get()))
-		submit.grid(row = 6, column = 6)
 
 		self.window.pack()
 
@@ -458,54 +458,66 @@ class inspectionreportsrestaurant:
 		self.window.destroy()
 		self.window = ttk.Frame(self.master)
 
-		ttk.Label(self.window, text = "Select your restaurant").grid(row = 0, columnspan = 2)
+		ttk.Label(self.window, text = "Select your restaurant").grid(row = 0, column=0, sticky="W")
 
 		restaurants = SQLfunc("SELECT name FROM restaurant WHERE email = " + "'" + globemail + "'")
 
 		restaurantSelect = StringVar(self.window)
 		restaurantSelect.set(restaurants[0])
-		apply(OptionMenu, (self.window, restaurantSelect) + tuple(restaurants)).grid(row = 1)
+		apply(OptionMenu, (self.window, restaurantSelect) + tuple(restaurants)).grid(row = 1, column=0, sticky="W")
+		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitrestaurant(restaurantSelect.get()))
+		submit.grid(row = 1, column = 1, sticky="W")
 
 		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
 		RestID = str(RestID[0])
 		inspections = SQLfunc("SELECT idate, totalscore, passfail FROM inspection WHERE rid = " + RestID + " ORDER BY idate DESC LIMIT 2")
 
-		ttk.Label(self.window, text = str(inspections[0])).grid(row = 2, column = 3)
+		if len(inspections) > 0:
 
-		ttk.Label(self.window, text = "Item Number").grid(row = 3)
-		ttk.Label(self.window, text = "Item Description").grid(row = 3, column = 1)
-		ttk.Label(self.window, text = "Score").grid(row = 3, column = 3)
+			self.resultsGrid = ttk.Frame(self.window, background="black")
+			self.resultsGrid.grid(sticky="nsew")
 
-		items = SQLfunc("SELECT itemnum, description FROM item")
+			ttk.Label(self.resultsGrid, text = "").grid(row=2, column=0, columnspan=2, padx=1, pady=1, sticky="nsew")
+			ttk.Label(self.resultsGrid, text = str(inspections[0])).grid(row = 2, column = 3, padx=1, pady=1)
 
-		scores2 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[0]) + "'")
+			ttk.Label(self.resultsGrid, text = "Item Number").grid(row = 3, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "Item Description").grid(row = 3, column = 1, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "Score").grid(row = 3, column = 3, sticky="nsew", padx=1, pady=1)
 
-		for i in range(len(items) / 2):
-			ttk.Label(self.window, text = str(items[i * 2])).grid(row = 4 + i, column = 0)
-			ttk.Label(self.window, text = str(items[i * 2 + 1])).grid(row = 4 + i, column = 1)
+			items = SQLfunc("SELECT itemnum, description FROM item")
 
-		for i in range(len(scores2)):
-			ttk.Label(self.window, text = str(scores2[i])).grid(row = 4 + i, column = 3)
+			scores2 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[0]) + "'")
 
-		ttk.Label(self.window, text = "TOTAL SCORE").grid(row = 5 + len(scores2))
-		ttk.Label(self.window, text = str(inspections[1])).grid(row = 5 + len(scores2), column = 3)
-		ttk.Label(self.window, text = "PASS?").grid(row = 6 + len(scores2))
-		ttk.Label(self.window, text = str(inspections[2])).grid(row = 6 + len(scores2), column = 3)
+			for i in range(len(items) / 2):
+				ttk.Label(self.resultsGrid, text = str(items[i * 2])).grid(row = 4 + i, column = 0, sticky="nsew", padx=1, pady=1)
+				ttk.Label(self.resultsGrid, text = str(items[i * 2 + 1])).grid(row = 4 + i, column = 1, sticky="nsew", padx=1, pady=1)
 
-		if len(inspections) > 3:
-			ttk.Label(self.window, text = "Score").grid(row = 3, column = 2)
-			ttk.Label(self.window, text = str(inspections[3])).grid(row = 2, column = 2)
-			scores1 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[3]) + "'")
-			ttk.Label(self.window, text = str(inspections[4])).grid(row = 5 + len(scores1), column = 2)
-			for i in range(len(scores1)):
-				ttk.Label(self.window, text = str(scores1[i])).grid(row = 4 + i, column = 2)
-			ttk.Label(self.window, text = str(inspections[5])).grid(row = 6 + len(scores1), column = 2)
+			for i in range(len(scores2)):
+				ttk.Label(self.resultsGrid, text = str(scores2[i])).grid(row = 4 + i, column = 3, sticky="nsew", padx=1, pady=1)
 
+			ttk.Label(self.resultsGrid, text = "TOTAL SCORE").grid(row = 5 + len(scores2), sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "").grid(row = 5 + len(scores2), column=1, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = str(inspections[1])).grid(row = 5 + len(scores2), column = 3, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "RESULT").grid(row = 6 + len(scores2), sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "").grid(row = 6 + len(scores2), column=1, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = str(inspections[2])).grid(row = 6 + len(scores2), column = 3, sticky="nsew", padx=1, pady=1)
 
-		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
-		cancel.grid(row = 7 + len(scores2))
-		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitrestaurant(restaurantSelect.get()))
-		submit.grid(row = 7 + len(scores2), column = 6)
+			if len(inspections) > 3:
+				ttk.Label(self.resultsGrid, text = "Score").grid(row = 3, column = 2, sticky="nsew", padx=1, pady=1)
+				ttk.Label(self.resultsGrid, text = str(inspections[3])).grid(row = 2, column = 2, sticky="nsew", padx=1, pady=1)
+				scores1 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[3]) + "'")
+				ttk.Label(self.resultsGrid, text = str(inspections[4])).grid(row = 5 + len(scores1), column = 2, sticky="nsew", padx=1, pady=1)
+				for i in range(len(scores1)):
+					ttk.Label(self.resultsGrid, text = str(scores1[i])).grid(row = 4 + i, column = 2, sticky="nsew", padx=1, pady=1)
+				ttk.Label(self.resultsGrid, text = str(inspections[5])).grid(row = 6 + len(scores1), column = 2, sticky="nsew", padx=1, pady=1)
+
+			cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+			cancel.grid(row = 7 + len(scores2))
+
+		else:
+			ttk.Label(self.window, text = "No inspections for this restaurant: " + restaurant).grid(row = 2)
+			cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
+			cancel.grid(row = 3)
 
 		self.window.pack()
 
@@ -555,12 +567,12 @@ class inspreport:
 		self.window = ttk.Frame(self.master)
 		ttk.Label(self.window, text = "Restaurant ID").grid(row = 0, column = 0)
 		ttk.Label(self.window, text = "Inspection Date YYYY-MM-DD").grid(row = 1, column = 0)
-		
+
 		rid = ttk.Entry(self.window)
 		date = ttk.Entry(self.window)
 
 		rid.grid(row = 0, column = 1)
-		date.grid(row = 1, column = 1)		
+		date.grid(row = 1, column = 1)
 
 		items = SQLfunc("SELECT itemnum,description,critical FROM item")
 
