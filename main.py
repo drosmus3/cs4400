@@ -928,16 +928,17 @@ class summarytop:
 				submit.grid(row = 3, column = 1)
 
 			else:
-				ttk.Label(self.window, text = "Cuisine").grid(row = 2, column = 0)
-				ttk.Label(self.window, text = "Restaurant Name").grid(row = 2, column = 1)
-				ttk.Label(self.window, text = "Address").grid(row = 2, column = 2)
-				ttk.Label(self.window, text = "Inspection Score").grid(row = 2, column = 3)
+				ttk.Label(self.window, text = "Cuisine", bg="slategrey", fg="white").grid(row = 2, column = 0, sticky="nsew", padx=1)
+				ttk.Label(self.window, text = "Restaurant Name", bg="slategrey", fg="white").grid(row = 2, column = 1, sticky="nsew", padx=1)
+				ttk.Label(self.window, text = "Address", bg="slategrey", fg="white").grid(row = 2, column = 2, sticky="nsew", padx=1)
+				ttk.Label(self.window, text = "Inspection Score", bg="slategrey", fg="white").grid(row = 2, column = 3, sticky="nsew", padx=1)
 
 				for i in range (len(results) / 7):
-					Label(self.window, text = results[0 + i * 7]).grid(row = i + 3, column = 0)
-					Label(self.window, text = results[1 + i * 7]).grid(row = i + 3, column = 1)
-					Label(self.window, text = results[2 + i * 7] + ", " + results[3 + i * 7] + ", " + results[4 + i * 7] + " " + str(results[5 + i * 7])).grid(row = i + 3, column = 2)
-					Label(self.window, text = results[6 + i * 7]).grid(row = i + 3, column = 3)
+					bgColor = "thistle" if i%2 is 0 else "blanchedalmond"
+					Label(self.window, text = results[0 + i * 7], bg=bgColor).grid(row = i + 3, column = 0, sticky="nsew", padx=1)
+					Label(self.window, text = results[1 + i * 7], bg=bgColor).grid(row = i + 3, column = 1, sticky="nsew", padx=1)
+					Label(self.window, text = results[2 + i * 7] + ", " + results[3 + i * 7] + ", " + results[4 + i * 7] + " " + str(results[5 + i * 7]), bg=bgColor).grid(row = i + 3, column = 2, sticky="nsew", padx=1)
+					Label(self.window, text = results[6 + i * 7], bg=bgColor).grid(row = i + 3, column = 3, sticky="nsew", padx=1)
 
 				cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 				cancel.grid(row = 4 + (len(results) / 7), column = 0)
