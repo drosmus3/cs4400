@@ -326,6 +326,7 @@ class ownerwindow(ttk.Frame):
 		self.newWindow = ttk.Toplevel(self.master)
 		self.app = inspectionreportsrestaurant(self.newWindow)
 
+# window
 class restrauntinfo:
 	def __init__(self,master):
 		self.master = master
@@ -379,11 +380,11 @@ class restrauntinfo:
 		self.master.destroy()
 
 	def submitinfo(self,permitid,permitexpdate,name,street,city,state,zipcode,county,phone,cuisine):
-		r = re.compile('.{4}-.{2}-.{2}')
+		r = re.compile('d{4}-d{2}-d{2}')
 		correctDate = None
-		if r.match(date) and (date[0] + date[1] + date[2] + date[3] + date[5] + date[6] + date [8] + date[9]).isdigit():
+		if r.match(permitexpdate):
 			try:
-				newDate = datetime.datetime(int(date[0] + date[1] + date[2] + date[3]),int(date[5] + date[6]),int(date[8] + date[9]))
+				newDate = datetime.datetime(int(permitexpdate[0] + permitexpdate[1] + permitexpdate[2] + permitexpdate[3]),int(permitexpdate[5] + permitexpdate[6]),int(permitexpdate[8] + permitexpdate[9]))
 				correctDate = True
 			except ValueError:
 				correctDate = False
@@ -411,10 +412,10 @@ class restrauntinfo:
 			self.app = textwindow(self.newWindow,"Please enter a valid city")
 		elif not state or len(state) > 2:
 			self.newWindow = ttk.Toplevel(self.master)
-			self.app = textwindow(self.newWindow,"Please enter a valid state")	
+			self.app = textwindow(self.newWindow,"Please enter a valid state")
 		elif (not zipcode) or int(zipcode) <10000 or int(zipcode) > 99999:
 			self.newWindow = ttk.Toplevel(self.master)
-			self.app = textwindow(self.newWindow,"Please enter a valid zip code")		
+			self.app = textwindow(self.newWindow,"Please enter a valid zip code")
 		elif not county or len(county) > 20:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid county")
@@ -973,14 +974,37 @@ class summarycomplaints:
 			bcomplaints.grid(row = 1, column = 1)
 			bscore.grid(row = 2, column = 1)
 
-			searchString = ("SELECT distinct rid FROM (SELECT * FROM (SELECT * FROM (select rid,COUNT(*) AS A "
-				"FROM complaint GROUP BY rid) AS complaintcount WHERE A >= "
-				+ str(complaints)
-				+") AS B NATURAL JOIN complaint) AS C "
-				+ "NATURAL JOIN (SELECT * FROM (SELECT rid, MAX(idate) AS idate, totalscore FROM inspection WHERE totalscore <= "
-				+ str(score)
-				+ " GROUP BY rid) AS D NATURAL JOIN (SELECT rid,idate FROM (item NATURAL JOIN contains) WHERE critical = 'Y' AND score < 9 "
-				+ "GROUP BY rid, idate) AS E) AS F")
+			searchString = ("SELECT distinct rid "
+							"FROM ("
+									"SELECT * "
+									"FROM ("
+											"SELECT * "
+											"FROM ("
+													"select rid, COUNT(*) AS A "
+													"FROM complaint "
+													"GROUP BY rid"
+													") AS complaintcount "
+											"WHERE A >= " + str(complaints)	+
+										") AS B "
+									"NATURAL JOIN complaint"
+								") AS C "
+								"NATURAL JOIN ("
+												"SELECT rid, MAX(idate) AS idate, totalscore "
+												"FROM ("
+														"SELECT rid, MAX(idate) AS idate, totalscore "
+														"FROM inspection "
+														"WHERE totalscore <= " + str(score)	+
+														#" AND year(idate) = " + str(year) + ?
+														" GROUP BY rid"
+													") AS D "
+												"NATURAL JOIN ("
+																"SELECT rid, idate "
+																"FROM (item NATURAL JOIN contains) "
+																"WHERE critical = 'Y' AND score < 9 "
+																"GROUP BY rid, idate"
+															") AS E "
+												"GROUP BY rid"
+											") AS F")
 
 			results = SQLfunc(searchString)
 
