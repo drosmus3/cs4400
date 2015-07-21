@@ -942,7 +942,7 @@ class summarycomplaints:
 		cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 		cancel.grid(row = 3, column = 0)
 		submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(byear.get(), bcomplaints.get(), bscore.get()))
-		submit.grid(row = 3, column = 2)
+		submit.grid(row = 3, column = 1)
 
 		self.window.pack()
 
@@ -1033,10 +1033,14 @@ class summarycomplaints:
 					Label(self.window, text = complaints[j]).grid(row = rowcount, column = 0, columnspan = 5, sticky = "W")
 					rowcount = rowcount + 1
 
+			if len(results) is 0:
+				Label(self.window, text = "No results!").grid(row=rowcount, column=0, columnspan=2)
+				rowcount += 1
+
 			cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 			cancel.grid(row = rowcount, column = 0)
 			submit = ttk.Button(self.window, text = "Submit", command = lambda: self.submitinfo(byear.get(), bcomplaints.get(), bscore.get()))
-			submit.grid(row = rowcount, column = 4)
+			submit.grid(row = rowcount, column = 1)
 
 			self.window.pack()
 
