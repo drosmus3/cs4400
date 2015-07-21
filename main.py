@@ -162,7 +162,7 @@ class guestsearch:
 
 		lgvariable = StringVar(self.frame)
 		lgvariable.set(lessgreater[0])
-		apply(OptionMenu, (self.frame, lgvariable) + tuple(lessgreater)).grid(row = 2, column = 2)
+		apply(OptionMenu, (self.frame, lgvariable) + tuple(lessgreater)).grid(row = 2, column = 2, sticky="w")
 
 		cuisines = SQLfunc("SELECT cuisine FROM cuisines")
 		cuisines.insert(0, "All Cuisines")
@@ -208,23 +208,26 @@ class guestsearch:
 			searchResult = SQLfunc(searchString)
 
 			if (len(searchResult)):
-				Label(self.frame, text = "Restaurant").grid(row = 5)
-				Label(self.frame, text = "Address").grid(row = 5, column = 1)
-				Label(self.frame, text = "Cuisine").grid(row = 5, column = 2)
-				Label(self.frame, text = "Last Inspection Score").grid(row = 5, column = 3)
-				Label(self.frame, text = "Date of Last Inspection").grid(row = 5, column = 4)
+				self.resultsGrid = ttk.Frame(self.frame, background="black")
+				self.resultsGrid.grid(sticky="nsew", columnspan=3)
+
+				Label(self.resultsGrid, text = "Restaurant").grid(row = 5, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Address").grid(row = 5, column = 1, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Cuisine").grid(row = 5, column = 2, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Last Inspection Score").grid(row = 5, column = 3, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Date of Last Inspection").grid(row = 5, column = 4, sticky="nsew", padx=1, pady=1)
 
 				for i in range (len(searchResult) / 8):
-					Label(self.frame, text = searchResult[0 + i * 8]).grid(row = i + 6)
-					Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult[3 + i * 8] + " " + str(searchResult[4 + i * 8])).grid(row = i + 6, column = 1)
+					Label(self.resultsGrid, text = searchResult[0 + i * 8]).grid(row = i + 6, sticky="nsew", padx=1, pady=1)
+					Label(self.resultsGrid, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult[3 + i * 8] + " " + str(searchResult[4 + i * 8])).grid(row = i + 6, column = 1, sticky="nsew", padx=1, pady=1)
 					#Label(self.frame, text = searchResult[1 + i * 8] + ", " + searchResult[2 + i * 8] + ", " + searchResult [3 + i * 8]).grid(row = i + 1, column = 1)
-					Label(self.frame, text = searchResult[5 + i * 8]).grid(row = i + 6, column = 2)
-					Label(self.frame, text = str(searchResult[6 + i * 8])).grid(row = i + 6, column = 3)
-					Label(self.frame, text = str(searchResult[7 + i * 8])).grid(row = i + 6, column = 4)
+					Label(self.resultsGrid, text = searchResult[5 + i * 8]).grid(row = i + 6, column = 2, sticky="nsew", padx=1, pady=1)
+					Label(self.resultsGrid, text = str(searchResult[6 + i * 8])).grid(row = i + 6, column = 3, sticky="nsew", padx=1, pady=1)
+					Label(self.resultsGrid, text = str(searchResult[7 + i * 8])).grid(row = i + 6, column = 4, sticky="nsew", padx=1, pady=1)
 
 				#NEED TO ADD: Actually displaying the restaurants
 			else:
-				Label(self.frame, text = "No results found").grid(row = 5, columnspan = 2)
+				Label(self.frame, text = "No results found").grid(row = 5, columnspan = 2, sticky="nsew")
 
 		cancel = ttk.Button(self.frame, text = "Close", command = self.close)
 		cancel.grid(row = 7 + len(searchResult) / 8)
@@ -311,28 +314,28 @@ class guestcomplaint:
 class ownerwindow(ttk.Frame):
 	def __init__(self, master, controller):
 		ttk.Frame.__init__(self, master)
-		search = ttk.Button(self, text = "Enter information about a restaurant", command = self.openrestrauntinfo)
+		search = ttk.Button(self, text = "Enter information about a restaurant", command = self.openrestaurantinfo)
 		complaint = ttk.Button(self, text = "View health inspection reports", command = self.openinspectionreport)
 		back = ttk.Button(self, text = "Back to Login Screen", command = lambda: controller.show_frame(loginScreen))
 		search.grid(row = 0)
 		complaint.grid(row = 1)
 		back.grid(row = 2)
 
-	def openrestrauntinfo(self):
+	def openrestaurantinfo(self):
 		self.newWindow = ttk.Toplevel(self.master)
-		self.app = restrauntinfo(self.newWindow)
+		self.app = restaurantinfo(self.newWindow)
 
 	def openinspectionreport(self):
 		self.newWindow = ttk.Toplevel(self.master)
 		self.app = inspectionreportsrestaurant(self.newWindow)
 
 # window
-class restrauntinfo:
+class restaurantinfo:
 	def __init__(self,master):
 		self.master = master
 		self.window = ttk.Frame(self.master)
 		ttk.Label(self.window, text = "Enter All Information").grid(row = 0, columnspan = 4)
-		ttk.Label(self.window, text = "Restraunt Name").grid(row = 1)
+		ttk.Label(self.window, text = "Restaurant Name").grid(row = 1)
 		ttk.Label(self.window, text = "Phone").grid(row = 2)
 		ttk.Label(self.window, text = "Health Permit ID").grid(row = 3)
 		ttk.Label(self.window, text = "Health Permit Expiration (YYYY-MM-DD)").grid(row = 4)
