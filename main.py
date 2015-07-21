@@ -477,42 +477,45 @@ class inspectionreportsrestaurant:
 
 		if len(inspections) > 0:
 
-			self.resultsGrid = ttk.Frame(self.window, background="black")
+			self.resultsGrid = ttk.Frame(self.window, background="white")
 			self.resultsGrid.grid(sticky="nsew")
 
 			ttk.Label(self.resultsGrid, text = "").grid(row=2, column=0, columnspan=2, padx=1, pady=1, sticky="nsew")
-			ttk.Label(self.resultsGrid, text = str(inspections[0])).grid(row = 2, column = 3, padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = str(inspections[0]), bg="slategrey", fg="white").grid(row = 2, column = 3, padx=1, pady=1)
 
-			ttk.Label(self.resultsGrid, text = "Item Number").grid(row = 3, sticky="nsew", padx=1, pady=1)
-			ttk.Label(self.resultsGrid, text = "Item Description").grid(row = 3, column = 1, sticky="nsew", padx=1, pady=1)
-			ttk.Label(self.resultsGrid, text = "Score").grid(row = 3, column = 3, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "Item Number", bg="slategrey", fg="white").grid(row = 3, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "Item Description", bg="slategrey", fg="white").grid(row = 3, column = 1, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "Score", bg="slategrey", fg="white").grid(row = 3, column = 3, sticky="nsew", padx=1, pady=1)
 
 			items = SQLfunc("SELECT itemnum, description FROM item")
 
 			scores2 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[0]) + "'")
 
 			for i in range(len(items) / 2):
-				ttk.Label(self.resultsGrid, text = str(items[i * 2])).grid(row = 4 + i, column = 0, sticky="nsew", padx=1, pady=1)
-				ttk.Label(self.resultsGrid, text = str(items[i * 2 + 1])).grid(row = 4 + i, column = 1, sticky="nsew", padx=1, pady=1)
+				bgColor = "thistle" if i%2 is 0 else "blanchedalmond"
+				ttk.Label(self.resultsGrid, text = str(items[i * 2]), bg=bgColor).grid(row = 4 + i, column = 0, sticky="nsew", padx=1, pady=1)
+				ttk.Label(self.resultsGrid, text = str(items[i * 2 + 1]), bg=bgColor).grid(row = 4 + i, column = 1, sticky="nsew", padx=1, pady=1)
 
 			for i in range(len(scores2)):
-				ttk.Label(self.resultsGrid, text = str(scores2[i])).grid(row = 4 + i, column = 3, sticky="nsew", padx=1, pady=1)
+				bgColor = "thistle" if i%2 is 0 else "blanchedalmond"
+				ttk.Label(self.resultsGrid, text = str(scores2[i]), bg=bgColor).grid(row = 4 + i, column = 3, sticky="nsew", padx=1, pady=1)
 
-			ttk.Label(self.resultsGrid, text = "TOTAL SCORE").grid(row = 5 + len(scores2), sticky="nsew", padx=1, pady=1)
-			ttk.Label(self.resultsGrid, text = "").grid(row = 5 + len(scores2), column=1, sticky="nsew", padx=1, pady=1)
-			ttk.Label(self.resultsGrid, text = str(inspections[1])).grid(row = 5 + len(scores2), column = 3, sticky="nsew", padx=1, pady=1)
-			ttk.Label(self.resultsGrid, text = "RESULT").grid(row = 6 + len(scores2), sticky="nsew", padx=1, pady=1)
-			ttk.Label(self.resultsGrid, text = "").grid(row = 6 + len(scores2), column=1, sticky="nsew", padx=1, pady=1)
-			ttk.Label(self.resultsGrid, text = str(inspections[2])).grid(row = 6 + len(scores2), column = 3, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "TOTAL SCORE", bg="slategrey", fg="white").grid(row = 5 + len(scores2), sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "", bg="slategrey", fg="white").grid(row = 5 + len(scores2), column=1, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = str(inspections[1]), bg="slategrey", fg="white").grid(row = 5 + len(scores2), column = 3, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "RESULT", bg="slategrey", fg="white").grid(row = 6 + len(scores2), sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = "", bg="slategrey", fg="white").grid(row = 6 + len(scores2), column=1, sticky="nsew", padx=1, pady=1)
+			ttk.Label(self.resultsGrid, text = str(inspections[2]), bg="slategrey", fg="white").grid(row = 6 + len(scores2), column = 3, sticky="nsew", padx=1, pady=1)
 
 			if len(inspections) > 3:
-				ttk.Label(self.resultsGrid, text = "Score").grid(row = 3, column = 2, sticky="nsew", padx=1, pady=1)
+				ttk.Label(self.resultsGrid, text = "Score", bg="slategrey", fg="white").grid(row = 3, column = 2, sticky="nsew", padx=1, pady=1)
 				ttk.Label(self.resultsGrid, text = str(inspections[3])).grid(row = 2, column = 2, sticky="nsew", padx=1, pady=1)
 				scores1 = SQLfunc("SELECT score FROM contains WHERE rid = " + RestID + " AND idate = " + "'" + str(inspections[3]) + "'")
-				ttk.Label(self.resultsGrid, text = str(inspections[4])).grid(row = 5 + len(scores1), column = 2, sticky="nsew", padx=1, pady=1)
+				ttk.Label(self.resultsGrid, text = str(inspections[4]), bg="slategrey", fg="white").grid(row = 5 + len(scores1), column = 2, sticky="nsew", padx=1, pady=1)
 				for i in range(len(scores1)):
-					ttk.Label(self.resultsGrid, text = str(scores1[i])).grid(row = 4 + i, column = 2, sticky="nsew", padx=1, pady=1)
-				ttk.Label(self.resultsGrid, text = str(inspections[5])).grid(row = 6 + len(scores1), column = 2, sticky="nsew", padx=1, pady=1)
+					bgColor = "thistle" if i%2 is 0 else "blanchedalmond"
+					ttk.Label(self.resultsGrid, text = str(scores1[i]), bg=bgColor).grid(row = 4 + i, column = 2, sticky="nsew", padx=1, pady=1)
+				ttk.Label(self.resultsGrid, text = str(inspections[5]), bg="slategrey", fg="white").grid(row = 6 + len(scores1), column = 2, sticky="nsew", padx=1, pady=1)
 
 			cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 			cancel.grid(row = 7 + len(scores2))
@@ -734,10 +737,10 @@ class summarymonthyear:
 			searchString = searchString + "%') AS A GROUP BY County,Cuisine"
 			results = SQLfunc(searchString)
 
-			ttk.Label(self.window, text = "County").grid(row = 2)
-			ttk.Label(self.window, text = "Cuisine").grid(row = 2, column = 1)
-			ttk.Label(self.window, text = "Number of Restaurants Inspected").grid(row = 2, column = 2)
-			ttk.Label(self.window, text = "Number of Restaurants Failed").grid(row = 2, column = 3)
+			ttk.Label(self.window, text = "County", bg="midnightblue", fg="white").grid(row = 2, padx=1, sticky="nsew")
+			ttk.Label(self.window, text = "Cuisine", bg="midnightblue", fg="white").grid(row = 2, column = 1, padx=1, sticky="nsew")
+			ttk.Label(self.window, text = "Number of Restaurants Inspected", bg="midnightblue", fg="white").grid(row = 2, column = 2, padx=1, sticky="nsew")
+			ttk.Label(self.window, text = "Number of Restaurants Failed", bg="midnightblue", fg="white").grid(row = 2, column = 3, padx=1, sticky="nsew")
 
 			counties = SQLfunc("SELECT DISTINCT County FROM restaurant GROUP BY County")
 			cuisines = SQLfunc("SELECT cuisine FROM cuisines")
@@ -750,30 +753,33 @@ class summarymonthyear:
 			found = False
 			for i in range(len(counties)):
 				for j in range(len(cuisines)):
-					ttk.Label(self.window, text = str(counties[i])).grid(row = offset + j + i * len(cuisines), column = 0)
-					ttk.Label(self.window, text = str(cuisines[j])).grid(row = offset + j + i * len(cuisines), column = 1)
+					bgColor = "thistle" if j%2 is 0 else "blanchedalmond"
+					ttk.Label(self.window, text = str(counties[i]), bg=bgColor).grid(row = offset + j + i * len(cuisines), column = 0, padx=1, sticky="nsew")
+					ttk.Label(self.window, text = str(cuisines[j]), bg=bgColor).grid(row = offset + j + i * len(cuisines), column = 1, padx=1, sticky="nsew")
 					for k in range(len(results) / 4):
 						if((results[4 * k] == counties[i]) and (results[4 * k + 1] == cuisines[j])):
-							ttk.Label(self.window, text = str(results[4 * k + 2])).grid(row = offset + j + i * len(cuisines), column = 2)
-							ttk.Label(self.window, text = str(results[4 * k + 3])).grid(row = offset + j + i * len(cuisines), column = 3)
+							ttk.Label(self.window, text = str(results[4 * k + 2]), bg=bgColor).grid(row = offset + j + i * len(cuisines), column = 2, padx=1, sticky="nsew")
+							ttk.Label(self.window, text = str(results[4 * k + 3]), bg=bgColor).grid(row = offset + j + i * len(cuisines), column = 3, padx=1, sticky="nsew")
 							inspectedcount = inspectedcount + results[4 * k + 2]
 							failedcount = failedcount + results[4 * k + 3]
 							inspectedcounttotal = inspectedcounttotal + results[4 * k + 2]
 							failedcounttotal = failedcounttotal + results[4 * k + 3]
 							found = True
 					if not found:
-						ttk.Label(self.window, text = "0").grid(row = offset + j + i * len(cuisines), column = 2)
-						ttk.Label(self.window, text = "0").grid(row = offset + j + i * len(cuisines), column = 3)
+						ttk.Label(self.window, text = "0", bg=bgColor).grid(row = offset + j + i * len(cuisines), column = 2, padx=1, sticky="nsew")
+						ttk.Label(self.window, text = "0", bg=bgColor).grid(row = offset + j + i * len(cuisines), column = 3, padx=1, sticky="nsew")
 					found = False	
 				offset = offset + 1
-				ttk.Label(self.window, text = "Sub Total").grid(row = offset + j + i * len(cuisines), column = 1)
-				ttk.Label(self.window, text = str(inspectedcount)).grid(row = offset + j + i * len(cuisines), column = 2)
-				ttk.Label(self.window, text = str(failedcount)).grid(row = offset + j + i * len(cuisines), column = 3)
+				ttk.Label(self.window, text = counties[i], bg="slategrey", fg="white").grid(row = offset + j + i * len(cuisines), column = 0, padx=1, sticky="nsew")
+				ttk.Label(self.window, text = "Sub Total", bg="slategrey", fg="white").grid(row = offset + j + i * len(cuisines), column = 1, padx=1, sticky="nsew")
+				ttk.Label(self.window, text = str(inspectedcount), bg="slategrey", fg="white").grid(row = offset + j + i * len(cuisines), column = 2, padx=1, sticky="nsew")
+				ttk.Label(self.window, text = str(failedcount), bg="slategrey", fg="white").grid(row = offset + j + i * len(cuisines), column = 3, padx=1, sticky="nsew")
 				inspectedcount = 0
 				failedcount = 0
-			ttk.Label(self.window, text = "Grand Total").grid(row = offset + (len(counties) * len(cuisines)), column = 0)
-			ttk.Label(self.window, text = str(inspectedcounttotal)).grid(row = offset + (len(counties) * len(cuisines)), column = 2)
-			ttk.Label(self.window, text = str(failedcounttotal)).grid(row = offset + (len(counties) * len(cuisines)), column = 3)
+			ttk.Label(self.window, text = "Grand Total", bg="midnightblue", fg="white").grid(row = offset + (len(counties) * len(cuisines)), column = 0, padx=1, sticky="nsew")
+			ttk.Label(self.window, text = "", bg="midnightblue", fg="white").grid(row = offset + (len(counties) * len(cuisines)), column = 1, padx=1, sticky="nsew")
+			ttk.Label(self.window, text = str(inspectedcounttotal), bg="midnightblue", fg="white").grid(row = offset + (len(counties) * len(cuisines)), column = 2, padx=1, sticky="nsew")
+			ttk.Label(self.window, text = str(failedcounttotal), bg="midnightblue", fg="white").grid(row = offset + (len(counties) * len(cuisines)), column = 3, padx=1, sticky="nsew")
 
 			cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 			cancel.grid(row = 1 + offset + (len(counties)) * len(cuisines))
@@ -843,24 +849,25 @@ class summarycountyyear:
 			'November',
 			'December']
 
-			ttk.Label(self.window, text = "Month").grid(row = 2)
-			ttk.Label(self.window, text = "Restaurants Inspected").grid(row = 2, column = 1)
+			ttk.Label(self.window, text = "Month", bg="slategrey", fg="white").grid(row = 2, sticky="nsew", padx=1)
+			ttk.Label(self.window, text = "Restaurants Inspected", bg="slategrey", fg="white").grid(row = 2, column = 1, stick="nsew", padx=1)
 
 			found = False
 			count = 0
 			for i in range(1,12):
-				ttk.Label(self.window, text = months[i-1]).grid(row = i + 2, column = 0)
+				bgColor = "thistle" if i%2 is 0 else "blanchedalmond"
+				ttk.Label(self.window, text = months[i-1], bg=bgColor).grid(row = i + 2, column = 0, padx=1, sticky="nsew")
 				for k in range(len(results) / 2):
 					if(results[2 * k] == i):
-						ttk.Label(self.window, text = results[2 * k + 1]).grid(row = i + 2, column = 1)
+						ttk.Label(self.window, text = results[2 * k + 1], bg=bgColor).grid(row = i + 2, column = 1, padx=1, sticky="nsew")
 						count = count + results[2 * k + 1]
 						found = True
 				if not found:
-					ttk.Label(self.window, text = "0").grid(row = i + 2, column = 1)
+					ttk.Label(self.window, text = "0", bg=bgColor).grid(row = i + 2, column = 1, padx=1, sticky="nsew")
 				found = False
 
-			ttk.Label(self.window, text = "Grand Total").grid(row = 15, column = 0)
-			ttk.Label(self.window, text = str(count)).grid(row = 15, column = 1)
+			ttk.Label(self.window, text = "Grand Total", bg="slategrey", fg="white").grid(row = 15, column = 0)
+			ttk.Label(self.window, text = str(count), bg="slategrey", fg="white").grid(row = 15, column = 1)
 
 			cancel = ttk.Button(self.window, text = "Cancel", command = self.close)
 			cancel.grid(row = 16, column = 0)
