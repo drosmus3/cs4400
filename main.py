@@ -211,11 +211,11 @@ class guestsearch:
 				self.resultsGrid = ttk.Frame(self.frame, background="black")
 				self.resultsGrid.grid(sticky="nsew", columnspan=3)
 
-				Label(self.resultsGrid, text = "Restaurant").grid(row = 5, sticky="nsew", padx=1, pady=1)
-				Label(self.resultsGrid, text = "Address").grid(row = 5, column = 1, sticky="nsew", padx=1, pady=1)
-				Label(self.resultsGrid, text = "Cuisine").grid(row = 5, column = 2, sticky="nsew", padx=1, pady=1)
-				Label(self.resultsGrid, text = "Last Inspection Score").grid(row = 5, column = 3, sticky="nsew", padx=1, pady=1)
-				Label(self.resultsGrid, text = "Date of Last Inspection").grid(row = 5, column = 4, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Restaurant", bg="powderblue").grid(row = 5, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Address", bg="powderblue").grid(row = 5, column = 1, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Cuisine", bg="powderblue").grid(row = 5, column = 2, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Last Inspection Score", bg="powderblue").grid(row = 5, column = 3, sticky="nsew", padx=1, pady=1)
+				Label(self.resultsGrid, text = "Date of Last Inspection", bg="powderblue").grid(row = 5, column = 4, sticky="nsew", padx=1, pady=1)
 
 				for i in range (len(searchResult) / 8):
 					Label(self.resultsGrid, text = searchResult[0 + i * 8]).grid(row = i + 6, sticky="nsew", padx=1, pady=1)
