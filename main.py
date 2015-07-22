@@ -54,10 +54,11 @@ class loginScreen(ttk.Frame):
 		MainLog.grid(row = 6, column = 1)
 
 	def openRohiWindow(self,controller,username,password):
-		if not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "'"):
+		a = re.compile(".*'.*")
+		if a.match(username) or not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "'"):
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow, "User not found")
-		elif not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "' AND password = " + "'" + password + "'"):
+		elif a.match(password) or not SQLfunc("SELECT * FROM registereduser WHERE username = " + "'" + username + "' AND password = " + "'" + password + "'"):
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow, "Incorrect password")
 		elif SQLfunc("SELECT * FROM operatorowner WHERE username = " + "'" + username + "'"):
