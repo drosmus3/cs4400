@@ -197,7 +197,7 @@ class guestsearch:
 			if score:
 				if needand:
 					searchString = searchString + " AND "
-				searchString = searchString + "totalscore" + lg + score
+				searchString = searchString + "totalscore" + lg + '=' + score
 				needand = True
 			if zip:
 				if needand:
