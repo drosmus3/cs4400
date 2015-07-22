@@ -170,7 +170,11 @@ class guestsearch:
 		cuisineSelect.set(cuisines[0])
 		apply(OptionMenu, (self.frame, cuisineSelect) + tuple(cuisines)).grid(row = 4, column = 1)
 
-		if not score or not score.isdigit() or int(score) < 0 or int(score) > 100:
+		a = re.compile(".*'.*")
+		if a.match(name):
+			self.newWindow = ttk.Toplevel(self.master)
+			self.app = textwindow(self.newWindow,"Please enter a valid name")			
+		elif not score or not score.isdigit() or int(score) < 0 or int(score) > 100:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid score")
 		elif not zip or not zip.isdigit() or int(zip) <10000 or int(zip) > 99999:
@@ -277,8 +281,11 @@ class guestcomplaint:
 
 	def submitComplaint(self,date,first,last,phone,description,restaurant):
 		r = re.compile('\d{4}-\d{2}-\d{2}')
+		a = re.compile(".*'.*")
+		RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
+
 		correctDate = None
-		if r.match(date) and (date[0] + date[1] + date[2] + date[3] + date[5] + date[6] + date [8] + date[9]).isdigit():
+		if r.match(date):
 			try:
 				newDate = datetime.datetime(int(date[0] + date[1] + date[2] + date[3]),int(date[5] + date[6]),int(date[8] + date[9]))
 				correctDate = True
@@ -291,22 +298,24 @@ class guestcomplaint:
 		elif not correctDate:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid date in the format:YYYY-MM-DD")
-		elif not first or len(first) > 15:
+		elif not first or a.match(first) or len(first) > 15:
 			self.newWindow = ttk.Toplevel(self.master)
-			self.app = textwindow(self.newWindow,"Please enter a first name")
-		elif not last or len(last) > 30:
+			self.app = textwindow(self.newWindow,"Please enter a valid first name")
+		elif not last or a.match(last) or len(last) > 30:
 			self.newWindow = ttk.Toplevel(self.master)
-			self.app = textwindow(self.newWindow,"Please enter a last name")
+			self.app = textwindow(self.newWindow,"Please enter a valid last name")
 		elif not phone or not phone.isdigit() or int(phone) < 1000000000 or int(phone) > 9999999999:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid phone number")
-		elif not description or len(description) > 80:
+		elif not description or a.match(description) or len(description) > 80:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid description")
+		elif SQLfunc("SELECT * from complaint where rid = " + str(RestID[0]) + " AND phone = " + phone + " AND cdate = '" + date + "'"):
+			self.newWindow = ttk.Toplevel(self.master)
+			self.app = textwindow(self.newWindow,"A complaint already exists for that restaurant, phone number and date")
 		else:
 			if not SQLfunc("SELECT phone FROM customer WHERE phone = " + "'" + phone + "';"):
 				SQLfunc("INSERT INTO customer (phone, firstname, lastname) VALUES (" + "'" + phone + "', '" + first + "', '" + last + "')")
-			RestID = SQLfunc("SELECT rid FROM restaurant WHERE name = " + "'" + restaurant + "'")
 			SQLfunc("INSERT INTO complaint (cdate, rid, phone, description) VALUES (" + "'" + date + "', " + str(RestID[0]) + ", '" + phone + "', '" + description + "')")
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Complaint Submitted")
@@ -384,6 +393,7 @@ class restaurantinfo:
 
 	def submitinfo(self,permitid,permitexpdate,name,street,city,state,zipcode,county,phone,cuisine):
 		r = re.compile('\d{4}-\d{2}-\d{2}')
+		a = re.compile(".*'.*")
 		correctDate = None
 		if r.match(permitexpdate):
 			try:
@@ -392,7 +402,7 @@ class restaurantinfo:
 			except ValueError:
 				correctDate = False
 
-		if not name or len(name) > 30:
+		if not name or a.match(name) or len(name) > 30:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow, "Please enter a valid name")
 		elif not phone or not phone.isdigit() or int(phone) < 1000000000 or int(phone) > 9999999999:
@@ -407,24 +417,30 @@ class restaurantinfo:
 		elif not correctDate:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid permit expiration date in the format:YYYY-MM-DD")
-		elif not street or len(street) > 20:
+		elif not street or a.match(street) or len(street) > 20:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid street")
-		elif not city or len(city) > 20:
+		elif not city or a.match(city) or len(city) > 20:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid city")
-		elif not state or len(state) > 2:
+		elif not state or a.match(state) or len(state) > 2:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid state")
 		elif (not zipcode) or int(zipcode) <10000 or int(zipcode) > 99999:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid zip code")
-		elif not county or len(county) > 20:
+		elif not county or a.match(county) or len(county) > 20:
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Please enter a valid county")
 		elif SQLfunc("SELECT * FROM healthpermit WHERE hpid =" + str(permitid)):
 			self.newWindow = ttk.Toplevel(self.master)
 			self.app = textwindow(self.newWindow,"Health permit ID already exists")
+		elif SQLfunc("SELECT * FROM restaurant WHERE phone = " + phone):
+			self.newWindow = ttk.Toplevel(self.master)
+			self.app = textwindow(self.newWindow,"A restaurant already exists with that phone number")
+		elif SQLfunc("SELECT * FROM restaurant WHERE street = " + "'" + street + "' AND city = '" + city + "' AND state = '" + state + "' AND zipcode = " + zipcode):
+			self.newWindow = ttk.Toplevel(self.master)
+			self.app = textwindow(self.newWindow,"A restaurant already exists with that address")
 		else:
 			rid = SQLfunc("select MAX(rid) FROM restaurant")
 			newrid = rid[0] + 1
@@ -619,8 +635,9 @@ class inspreport:
 
 	def submitinfo(self,rid,date,items,score,comment):
 		r = re.compile('\d{4}-\d{2}-\d{2}')
+		a = re.compile(".*'.*")
 		correctDate = None
-		if r.match(date) and (date[0] + date[1] + date[2] + date[3] + date[5] + date[6] + date [8] + date[9]).isdigit():
+		if r.match(date):
 			try:
 				newDate = datetime.datetime(int(date[0] + date[1] + date[2] + date[3]),int(date[5] + date[6]),int(date[8] + date[9]))
 				correctDate = True
@@ -634,7 +651,7 @@ class inspreport:
 				self.app = textwindow(self.newWindow,"Please enter a valid score for item " + str(i + 1))
 				correct = False
 				break
-			if len(comment[i].get()) > 80:
+			if a.match(comment[i].get()) or len(comment[i].get()) > 80:
 				self.newWindow = ttk.Toplevel(self.master)
 				self.app = textwindow(self.newWindow,"Please enter a valid comment for item " + str(i + 1))
 				correct = False
@@ -1061,8 +1078,10 @@ class summarycomplaints:
 
 				complaints = SQLfunc("select description FROM complaint WHERE rid = " + str(results[i]) + " AND year(cdate) = " + str(year))
 				Label(self.resultsGrid, text = str(len(complaints))).grid(row = rowcount, column = 5, padx=1, pady=1, sticky="nsew")
-				Label(self.resultsGrid, text = "Customer Complaints:", bg="peachpuff").grid(row = rowcount + 1, column = 0, columnspan = 6, sticky = "nsew", padx=1, pady=1)
-				rowcount = rowcount + 2
+				if complaints:
+					Label(self.resultsGrid, text = "Customer Complaints:", bg="peachpuff").grid(row = rowcount + 1, column = 0, columnspan = 6, sticky = "nsew", padx=1, pady=1)
+					rowcount = rowcount + 1
+				rowcount = rowcount + 1
 				for j in range(len(complaints)):
 					Label(self.resultsGrid, text = complaints[j]).grid(row = rowcount, column = 0, columnspan = 6, sticky = "nsew", padx=1, pady=1)
 					rowcount = rowcount + 1
